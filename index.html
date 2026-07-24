@@ -280,15 +280,9 @@
                 debugLog("Sesión AR Terminada");
             });
 
-            setupUI(); // Vinculamos los eventos de los botones
+        
 
-            // CUBO DE SEGURIDAD: Se mostrará instantáneamente. Si lo ves, WebXR funciona.
-            const geoCubo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-            const matCubo = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-            const cuboPrueba = new THREE.Mesh(geoCubo, matCubo);
-            cuboPrueba.position.set(0, 0, -0.5);
-            scene.add(cuboPrueba);
-            debugLog("Cargando entorno...");
+        
 
             const loader = new GLTFLoader();
             loader.load('assets/egg.glb', function (gltf) {
