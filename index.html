@@ -37,14 +37,7 @@
             padding: 30px;
             pointer-events: auto;
             padding-bottom: 50px;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        /* Clase para ocultar la barra inferior durante la captura */
-        .hide-for-capture {
-            opacity: 0;
-            pointer-events: none !important;
-            transform: translateY(20px);
+            transition: opacity 0.3s ease;
         }
 
         .icon-btn {
@@ -79,29 +72,9 @@
             background-color: #000;
         }
 
-        /* Notificación flotante (Toast) para avisar al usuario */
-       
-        #toast-message {
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            text-align: center;
-        }
-
-        /* Contenedor del Carrusel de Modelos */
         #model-carousel-container {
             position: absolute;
-            bottom: 120px; /* Se sitúa arriba de la barra inferior */
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
@@ -111,7 +84,7 @@
             border-radius: 15px;
             padding: 15px;
             box-sizing: border-box;
-            display: none; /* Oculto por defecto */
+            display: none;
             flex-direction: column;
             pointer-events: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
@@ -125,19 +98,18 @@
             margin-bottom: 10px;
         }
 
-        .carousel-header h3 {
+        .carousel-header h2 {
             margin: 0;
-            font-size: 16px;
+            font-size: 18px;
             color: #333;
-            font-family: sans-serif;
         }
 
         #btn-close-carousel {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            color: #555;
+            color: #333;
             padding: 0;
             line-height: 1;
         }
@@ -149,7 +121,6 @@
             padding-bottom: 5px;
         }
 
-        /* Estilo para los botones de cada modelo */
         .model-option {
             flex: 0 0 70px;
             height: 70px;
@@ -168,11 +139,33 @@
             background: #e0e0e0;
             transform: scale(0.95);
         }
-        
-        /* Ajuste para los SVG que inyectaremos */
+
         .model-option svg {
             width: 40px;
             height: 40px;
+        }
+
+        .hide-for-capture {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        #toast-message {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            width: 80%;
+            max-width: 300px;
         }
     </style>
 
@@ -191,20 +184,20 @@
         <!-- Mensaje flotante de captura -->
         <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
 
-        <!-- Carrusel Selector de Modelos -->
-        <div id="model-carousel-container" class="hide-for-capture">
+        <!-- Carrusel de Modelos -->
+        <div id="model-carousel-container">
             <div class="carousel-header">
-                <h3>Elegir Modelo</h3>
+                <h2>Modelos 3D</h2>
                 <button id="btn-close-carousel">&times;</button>
             </div>
             <div id="model-carousel">
-                <!-- Se inyectarán desde JavaScript -->
+                <!-- Los botones con SVG se inyectan dinámicamente -->
             </div>
         </div>
 
         <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
-            <!-- Botón de Reposicionar -->
+            <!-- Botón de Reposicionar (Lógica visual) -->
             <button class="icon-btn" id="btn-reposition">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
             </button>
@@ -214,8 +207,9 @@
                 <div class="inner-circle"></div>
             </button>
             
-            <!-- Botón de Modelos (Antes Galería) -->
+            <!-- Botón de Modelos (Abre el carrusel) -->
             <button class="icon-btn" id="btn-models">
+                <!-- Ícono de 3D / Capas -->
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
             </button>
         </div>
@@ -229,29 +223,29 @@
         let camera, scene, renderer;
         let modelo3D, mixer; 
         const clock = new THREE.Clock(); 
-        const loader = new GLTFLoader(); // Declarado global para reusarlo
+        const loader = new GLTFLoader(); // Declarado global para reusarlo al cambiar modelos
 
         // CONFIGURACIÓN DE TUS MODELOS
-        // Aquí puedes agregar todos los dinosaurios que quieras
+        // Aquí puedes agregar todos los dinosaurios/objetos que quieras
         const modelosDisponibles = [
             { 
                 id: 'egg', 
                 url: 'assets/egg.glb', 
                 scale: 0.1, 
                 positionY: -0.2,
-                // Pega tu código SVG dentro de estas comillas invertidas:
+                // Pega tu código SVG dentro de estas comillas invertidas para cada modelo:
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
             },
             { 
                 id: 'dino1', 
-                url: 'assets/dino1.glb', // Cambia a la ruta de tu modelo
+                url: 'assets/dino1.glb', // Cambia a la ruta real de tu modelo
                 scale: 0.1, 
                 positionY: -0.2,
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M12 2v20"></path></svg>`
             },
             { 
                 id: 'dino2', 
-                url: 'assets/dino2.glb', // Cambia a la ruta de tu modelo
+                url: 'assets/dino2.glb', // Cambia a la ruta real de tu modelo
                 scale: 0.1, 
                 positionY: -0.2,
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
@@ -265,6 +259,7 @@
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
+            // Iluminación
             const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
             scene.add(luzAmbiental);
             
@@ -272,7 +267,7 @@
             luzDireccional.position.set(1, 2, 1);
             scene.add(luzDireccional);
 
-            // Importante: alpha: true permite ver la cámara real detrás del render
+            // Configuración optimizada para AR en móviles
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
             renderer.setPixelRatio(1); 
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -281,12 +276,14 @@
             
             document.body.appendChild(renderer.domElement);
             
+            // Botón de WebXR con DOM Overlay para permitir UI HTML sobre el canvas 3D
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
             };
             document.body.appendChild(ARButton.createButton(renderer, arOptions));
 
+            // Gestión de visibilidad de la interfaz al iniciar/cerrar sesión AR
             renderer.xr.addEventListener('sessionstart', () => {
                 const ui = document.getElementById('ar-ui');
                 ui.style.visibility = 'visible';
@@ -305,13 +302,13 @@
            
             window.addEventListener('resize', onWindowResize, false);
             
-            // Inicializar la interfaz del carrusel
+            // Inicializar la interfaz del carrusel de modelos
             construirCarrusel();
         }
 
-        // Función reutilizable para cambiar modelos
+        // Función reutilizable para cambiar modelos de forma eficiente
         function cargarModelo(modeloConfig) {
-            // 1. Limpiar modelo anterior si existe
+            // 1. Limpiar modelo anterior si existe para liberar memoria
             if (modelo3D) {
                 scene.remove(modelo3D);
             }
@@ -320,13 +317,14 @@
                 mixer = null;
             }
 
-            // 2. Cargar nuevo modelo
+            // 2. Cargar nuevo modelo desde la URL configurada
             loader.load(modeloConfig.url, function (gltf) {
                 modelo3D = gltf.scene;
                 modelo3D.scale.set(modeloConfig.scale, modeloConfig.scale, modeloConfig.scale); 
                 modelo3D.position.set(0, modeloConfig.positionY, -1); 
                 scene.add(modelo3D);
                 
+                // Reproducir animaciones automáticas si el modelo las incluye
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(modelo3D);
                     gltf.animations.forEach((clip) => {
@@ -354,7 +352,7 @@
             renderer.render(scene, camera);
         }
 
-        // Referencias del DOM actualizadas
+        // Referencias del DOM 
         const btnCapture = document.getElementById('btn-capture');
         const bottomBar = document.getElementById('bottom-bar');
         const toastMessage = document.getElementById('toast-message');
@@ -364,37 +362,36 @@
         const btnCloseCarousel = document.getElementById('btn-close-carousel');
         const carouselDiv = document.getElementById('model-carousel');
 
-        // Lógica de "Modo Captura de Pantalla"
+        // Lógica de "Modo Captura de Pantalla" (Tiempos separados)
         let toastTimeout;
         let uiTimeout;
 
         btnCapture.addEventListener('click', () => {
-            // 1. Ocultar la barra inferior y el carrusel
+            // 1. Ocultar la barra inferior y el carrusel inmediatamente
             bottomBar.classList.add('hide-for-capture');
             carouselContainer.classList.add('hide-for-capture');
             
-            // 2. Mostrar mensaje indicando que tomen la captura
+            // 2. Mostrar mensaje indicando que tomen la captura nativa
             toastMessage.style.opacity = '1';
 
-            // Limpiamos contadores
+            // Limpiamos contadores previos por si pulsa repetidas veces
             clearTimeout(toastTimeout);
             clearTimeout(uiTimeout);
 
-            // 3. Ocultar el mensaje a los 2.5 segundos
+            // 3. Ocultar el mensaje a los 2.5 segundos (deja la pantalla limpia)
             toastTimeout = setTimeout(() => {
                 toastMessage.style.opacity = '0';
             }, 2500);
 
-            // 4. Restaurar la interfaz a los 8 segundos
+            // 4. Restaurar la interfaz (botones) a los 8 segundos
             uiTimeout = setTimeout(() => {
                 bottomBar.classList.remove('hide-for-capture');
                 carouselContainer.classList.remove('hide-for-capture');
             }, 8000);
         });
 
-        // Lógica del Carrusel
+        // Lógica del Carrusel (Mostrar/Ocultar)
         btnModels.addEventListener('click', () => {
-            // Alternar mostrar/ocultar
             if(carouselContainer.style.display === 'flex') {
                 carouselContainer.style.display = 'none';
             } else {
@@ -406,6 +403,7 @@
             carouselContainer.style.display = 'none';
         });
 
+        // Generar dinámicamente los botones del carrusel basándonos en el arreglo de configuración
         function construirCarrusel() {
             modelosDisponibles.forEach((modelo, index) => {
                 const btnItem = document.createElement('div');
@@ -415,12 +413,13 @@
                 // Inyectar el SVG configurado
                 btnItem.innerHTML = modelo.svg;
 
+                // Evento al tocar un modelo del carrusel
                 btnItem.addEventListener('click', () => {
-                    // Actualizar estilos activos
+                    // Actualizar estilos activos visualmente
                     document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
                     btnItem.classList.add('active');
                     
-                    // Cargar el modelo
+                    // Cargar el modelo 3D correspondiente
                     cargarModelo(modelo);
                 });
 
