@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebXR - Immersive AR</title>
+    <title>DinoWebAR - Experiencia Inmersiva</title>
     
     <style>
         body {
@@ -14,31 +14,20 @@
             font-family: sans-serif;
         }
 
-        #info {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            text-align: center;
-            color: white;
-            z-index: -1; 
-        }
-
         #ar-ui {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Deja pasar los toques al canvas 3D */
+            pointer-events: none;
             z-index: 10;
-            
-            /* CAMBIO CRÍTICO: Usar visibility y opacity en lugar de display: none para no romper WebXR */
             display: flex; 
             visibility: hidden;
             opacity: 0;
-
             flex-direction: column;
             justify-content: flex-end;
+            transition: opacity 0.3s ease;
         }
 
         #bottom-bar {
@@ -46,21 +35,20 @@
             justify-content: space-between;
             align-items: center;
             padding: 30px;
-            pointer-events: auto; /* Hace que los botones sean interactivos */
+            pointer-events: auto;
             padding-bottom: 50px;
         }
 
         .icon-btn {
             width: 50px;
             height: 50px;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.7);
             border: 2px solid #000;
             border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.7);
         }
 
         #btn-capture {
@@ -73,6 +61,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
 
         #btn-capture .inner-circle {
@@ -89,7 +78,7 @@
             width: 80%;
             height: 80%;
             background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px); /* Efecto cristal */
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px;
             box-sizing: border-box;
@@ -133,7 +122,7 @@
         .gallery-item {
             width: 100%;
             aspect-ratio: 1;
-            background-color: rgba(0,0,0,0.05);
+            background-color: #e0e0e0; /* Fondo gris para resaltar el modelo 3D */
             border-radius: 8px;
             border: 1.5px solid #333;
             display: flex;
@@ -173,12 +162,8 @@
     </script>
 </head>
 <body>
-    <div id="info">Inicia la experiencia AR pulsando el botón inferior.</div>
-
     <div id="ar-ui">
-        <!-- NUEVO: Consola de depuración visible DURANTE la experiencia AR -->
-        <div id="ar-debug" style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:10px; font-size:12px; border-radius:8px; pointer-events:none;">Modo Seguro Activado...</div>
-
+        
         <!-- Modal de Galería -->
         <div id="gallery-modal">
             <div class="modal-header">
@@ -186,13 +171,14 @@
                 <button id="btn-close-gallery">&times;</button>
             </div>
             <div id="gallery-grid">
-                <!-- Las miniaturas se inyectarán desde Javascript -->
+                <!-- Inyectado dinámicamente -->
             </div>
-            <button id="btn-download">Descargar</button>
+            <button id="btn-download">Descargar Última</button>
         </div>
 
-        <!-- Barra inferior con botones (Iconos SVG basados en tu imagen) -->
+        <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
+            <!-- Botón de Reposicionar (Lógica pendiente para futuras fases) -->
             <button class="icon-btn" id="btn-reposition">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
             </button>
@@ -208,40 +194,25 @@
     </div>
 
     <script type="module">
-         import * as THREE from 'three';
+        import * as THREE from 'three';
         import { ARButton } from 'three/addons/webxr/ARButton.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         let camera, scene, renderer;
-        let modelo3D;
-        let mixer; // Controlador para las animaciones del modelo
-        const clock = new THREE.Clock(); // Necesario para calcular el tiempo de las animaciones
-
-        // NUEVO: Bandera para controlar cuándo tomar la foto
-        let solicitarCaptura = false; 
-
-        // NUEVO: Sistema de depuración en pantalla para diagnosticar el móvil
-        const infoDiv = document.getElementById('info');
-        const arDebugDiv = document.getElementById('ar-debug');
+        let modelo3D, mixer; 
+        const clock = new THREE.Clock(); 
         
-        function debugLog(msg) {
-            console.log(msg);
-            if(infoDiv) infoDiv.innerHTML = msg;
-            if(arDebugDiv) arDebugDiv.innerHTML = msg; // Lo muestra también dentro de AR
-        }
-        window.onerror = function(msg, url, line) {
-            debugLog("Error crítico: " + msg + " (Línea " + line + ")");
-        };
+        let solicitarCaptura = false; 
+        const galeriaImagenes = [];
 
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-            // Luces mejoradas para modelos 3D texturizados
+            // Iluminación
             const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
             scene.add(luzAmbiental);
             
@@ -249,50 +220,46 @@
             luzDireccional.position.set(1, 2, 1);
             scene.add(luzDireccional);
 
-            // CORRECCIÓN VITAL PARA MÓVILES: antialias en false y pixelRatio en 1 para evitar crasheos de memoria GPU
+            // Configuración optimizada para AR en móviles
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
             renderer.setPixelRatio(1); 
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 0); // NUEVO: FUERZA el fondo de WebGL a ser 100% transparente
+            renderer.setClearColor(0x000000, 0); 
             renderer.xr.enabled = true;
             
             document.body.appendChild(renderer.domElement);
             
+            // Botón de WebXR con DOM Overlay
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
             };
             document.body.appendChild(ARButton.createButton(renderer, arOptions));
 
-            // Eventos para mostrar/ocultar la UI al entrar y salir del modo Inmersivo
+            // Gestión de visibilidad de la interfaz
             renderer.xr.addEventListener('sessionstart', () => {
                 const ui = document.getElementById('ar-ui');
                 ui.style.visibility = 'visible';
                 ui.style.opacity = '1';
                 actualizarGaleria(); 
-                debugLog("AR Iniciada. ¿Ves el cubo y la cámara?");
             });
+            
             renderer.xr.addEventListener('sessionend', () => {
                 const ui = document.getElementById('ar-ui');
                 ui.style.visibility = 'hidden';
                 ui.style.opacity = '0';
                 document.getElementById('gallery-modal').style.display = 'none';
-                debugLog("Sesión AR Terminada");
             });
 
-        
-
-        
-
             const loader = new GLTFLoader();
+            // Asegúrate de usar la ruta correcta hacia tu modelo de dinosaurio
             loader.load('assets/egg.glb', function (gltf) {
                 modelo3D = gltf.scene;
-                modelo3D.scale.set(0.1, 0.1, 0.1); 
+                modelo3D.scale.set(0.1, 0.1, 0.1); // Ajusta la escala según necesites
                 modelo3D.position.set(0, -0.2, -1); 
                 scene.add(modelo3D);
                 
-                debugLog("Modelo 3D cargado con éxito");
-
+                // Reproducir animaciones si las tiene
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(modelo3D);
                     gltf.animations.forEach((clip) => {
@@ -300,10 +267,9 @@
                     });
                 }
             }, undefined, function (error) {
-                debugLog('Error en modelo .glb.');
+                console.error("Error al cargar el modelo 3D:", error);
             });
            
-
             window.addEventListener('resize', onWindowResize, false);
         }
 
@@ -318,164 +284,88 @@
         }
 
         function render() {
-            try {
-                const delta = clock.getDelta();
+            const delta = clock.getDelta();
 
-                if (mixer) {
-                    mixer.update(delta);
-                }
+            if (mixer) {
+                mixer.update(delta);
+            }
 
-                renderer.render(scene, camera);
-            
-                if (solicitarCaptura) {
-                    const imgData = renderer.domElement.toDataURL('image/png');
-                    galeriaImagenes.push(imgData);
-                    actualizarGaleria();
-                    solicitarCaptura = false;
-                }
-                 } catch (e) {
-                // Si el renderizador colapsa, capturamos el error aquí
-                debugLog("CRASH EN RENDER: " + e.message);
-                renderer.setAnimationLoop(null); 
+            renderer.render(scene, camera);
+        
+            // Lógica de captura limpia sincronizada con el render
+            if (solicitarCaptura) {
+                const imgData = renderer.domElement.toDataURL('image/png');
+                galeriaImagenes.push(imgData);
+                actualizarGaleria();
+                
+                // Descarga automática de la captura
+                const link = document.createElement('a');
+                link.download = `AR_Dino_${Date.now()}.png`;
+                link.href = imgData;
+                link.click();
+
+                solicitarCaptura = false;
             }
         }
 
-        const galeriaImagenes = [];
+        // Referencias del DOM
         const btnCapture = document.getElementById('btn-capture');
         const btnGallery = document.getElementById('btn-gallery');
         const btnCloseGallery = document.getElementById('btn-close-gallery');
         const modalGallery = document.getElementById('gallery-modal');
         const btnDownload = document.getElementById('btn-download');
 
-        // --- Acción: Botón Central de Captura ---
+        // Evento: Botón Central de Captura
         btnCapture.addEventListener('click', () => {
-            // Efecto sutil de destello blanco
+            // Flash visual blanco
             const overlay = document.getElementById('ar-ui');
-            overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+            overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
             setTimeout(() => { overlay.style.backgroundColor = 'transparent'; }, 150);
 
-            // Activamos la bandera para que capture en el siguiente frame
             solicitarCaptura = true;
         });
 
-        // --- Acción: Abrir Galería ---
+        // Evento: Abrir Galería
         btnGallery.addEventListener('click', () => {
             modalGallery.style.display = 'flex';
         });
 
-        // --- Acción: Cerrar Galería ---
+        // Evento: Cerrar Galería
         btnCloseGallery.addEventListener('click', () => {
             modalGallery.style.display = 'none';
         });
 
-        // --- Acción: Descargar Foto ---
+        // Evento: Descargar Manual desde Galería
         btnDownload.addEventListener('click', () => {
-            if (galeriaImagenes.length === 0) {
-                console.log('No hay fotos para descargar');
-                return;
-            }
-            // Descarga la foto más reciente capturada
+            if (galeriaImagenes.length === 0) return;
             const link = document.createElement('a');
-            link.download = 'mi-captura-ar.png';
+            link.download = `AR_Dino_Galeria_${Date.now()}.png`;
             link.href = galeriaImagenes[galeriaImagenes.length - 1];
             link.click();
         });
 
-    // --- Acción: Refrescar la cuadrícula de fotos ---
-    function actualizarGaleria() {
-        // Buscamos la cuadrícula (asegúrate de que en tu HTML la clase sea gallery-grid)
-        const grid = document.querySelector('.gallery-grid');
-        if (!grid) return;
-        
-        // Obtenemos los 8 espacios de la galería
-        const slots = grid.querySelectorAll('div');
-        
-        for (let i = 0; i < slots.length; i++) {
-            // Queremos que la última foto tomada sea la primera en verse
-            const fotoIndex = galeriaImagenes.length - 1 - i;
+        function actualizarGaleria() {
+            const grid = document.getElementById('gallery-grid');
+            if(!grid) return;
             
-            if (galeriaImagenes[fotoIndex]) {
-                // AÑADIDO: background-color para que el 3D se vea aunque el fondo sea transparente
-                slots[i].innerHTML = `<img src="${galeriaImagenes[fotoIndex]}" style="width:100%; height:100%; object-fit:contain; background-color:#e0e0e0; border-radius:8px;">`;
-            } else {
-                // Restauramos el icono vacío original si no hay foto
-                slots[i].innerHTML = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>`;
+            grid.innerHTML = ''; 
+
+            // Mostrar cuadrícula de 8 espacios
+            for (let i = 0; i < 8; i++) {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                
+                if (i < galeriaImagenes.length) {
+                    const img = document.createElement('img');
+                    img.src = galeriaImagenes[i];
+                    item.appendChild(img);
+                } else {
+                    // Ícono predeterminado para vacíos
+                    item.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+                }
+                grid.appendChild(item);
             }
         }
-    }
-
-    // --- Bucle de Animación y Renderizado ---
-    function render(timestamp, frame) {
-        const delta = clock.getDelta();
-        if (mixer) mixer.update(delta);
-        
-        renderer.render(scene, camera);
-
-        // AÑADIDO: Capturamos la foto JUSTO DESPUÉS del renderizado
-        if (solicitarCaptura) {
-            try {
-                const dataURL = renderer.domElement.toDataURL('image/png');
-                galeriaImagenes.push(dataURL);
-                actualizarGaleria();
-                debugLog("¡Foto guardada!");
-            } catch (e) {
-                debugLog("Error al guardar: " + e.message);
-            }
-            solicitarCaptura = false;
-        }
-    }
-
-        // --- Acción: Abrir Galería ---
-        btnGallery.addEventListener('click', () => {
-            modalGallery.style.display = 'flex';
-        });
-
-        // --- Acción: Cerrar Galería ---
-        btnCloseGallery.addEventListener('click', () => {
-            modalGallery.style.display = 'none';
-        });
-
-        // --- Acción: Descargar Foto ---
-        btnDownload.addEventListener('click', () => {
-            if (galeriaImagenes.length === 0) {
-                console.log('No hay fotos para descargar');
-                return;
-            }
-            // Descarga la foto más reciente capturada
-            const link = document.createElement('a');
-            link.download = 'mi-captura-ar.png';
-            link.href = galeriaImagenes[galeriaImagenes.length - 1];
-            link.click();
-        });
-
-    // --- Acción: Refrescar la cuadrícula de fotos ---
-    function actualizarGaleria() {
-        const grid = document.getElementById('gallery-grid');
-        if(!grid) return;
-        
-        grid.innerHTML = ''; 
-
-        // Mostrar 8 celdas simulando la cuadrícula de tu imagen diseño
-        for (let i = 0; i < 8; i++) {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            
-            if (i < galeriaImagenes.length) {
-                const img = document.createElement('img');
-                img.src = galeriaImagenes[i];
-                item.appendChild(img);
-            } else {
-                // Ícono de "montaña" por defecto para los huecos vacíos
-                item.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-            }
-            grid.appendChild(item);
-        }
-    }
-</script>
+    </script>
 </body>
 </html>
