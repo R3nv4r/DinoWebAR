@@ -6,7 +6,7 @@
     <title>DinoWebAR</title>
     <link rel="stylesheet" href="css/style.css">
    
-    <script type="importmap">
+       <script type="importmap">
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
@@ -16,7 +16,36 @@
     </script>
 </head>
 <body>
- <div id="info">Inicia la experiencia AR pulsando el botón inferior.</div>
+    <div id="info">Inicia la experiencia AR pulsando el botón inferior.</div>
+
+    <div id="ar-ui">
+        <!-- Modal de Galería -->
+        <div id="gallery-modal">
+            <div class="modal-header">
+                <h2>Galería</h2>
+                <button id="btn-close-gallery">&times;</button>
+            </div>
+            <div id="gallery-grid">
+                <!-- Las miniaturas se inyectarán desde Javascript -->
+            </div>
+            <button id="btn-download">Descargar</button>
+        </div>
+
+        <!-- Barra inferior con botones (Iconos SVG basados en tu imagen) -->
+        <div id="bottom-bar">
+            <button class="icon-btn" id="btn-reposition">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            </button>
+            
+            <button id="btn-capture">
+                <div class="inner-circle"></div>
+            </button>
+            
+            <button class="icon-btn" id="btn-gallery">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+        </div>
+    </div>
   <script type="module" src="js/camara.js"></script>
 </body>
 </html>
