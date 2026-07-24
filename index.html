@@ -212,6 +212,16 @@
         // NUEVO: Bandera para controlar cuándo tomar la foto
         let solicitarCaptura = false; 
 
+        // NUEVO: Sistema de depuración en pantalla para diagnosticar el móvil
+        const infoDiv = document.getElementById('info');
+        function debugLog(msg) {
+            console.log(msg);
+            if(infoDiv) infoDiv.innerHTML = msg;
+        }
+        window.onerror = function(msg, url, line) {
+            debugLog("Error crítico: " + msg + " (Línea " + line + ")");
+        };
+
         init();
         animate();
 
@@ -225,48 +235,60 @@
             scene.add(luzAmbiental);
             
             const luzDireccional = new THREE.DirectionalLight(0xffffff, 2);
-        luzDireccional.position.set(1, 2, 1);
-        scene.add(luzDireccional);
+            luzDireccional.position.set(1, 2, 1);
+            scene.add(luzDireccional);
 
-        // CORRECCIÓN: Quitamos preserveDrawingBuffer: true porque congela WebXR en móviles
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.xr.enabled = true;
-        
-        document.body.appendChild(renderer.domElement);
-        
-        const arOptions = {
-            optionalFeatures: ['dom-overlay'],
-            domOverlay: { root: document.getElementById('ar-ui') }
-        };
-        document.body.appendChild(ARButton.createButton(renderer, arOptions));
-
-        // Eventos para mostrar/ocultar la UI al entrar y salir del modo Inmersivo
-        renderer.xr.addEventListener('sessionstart', () => {
-            document.getElementById('ar-ui').style.display = 'flex';
-            actualizarGaleria(); 
-        });
-        renderer.xr.addEventListener('sessionend', () => {
-            document.getElementById('ar-ui').style.display = 'none';
-            document.getElementById('gallery-modal').style.display = 'none';
-        });
-
-        setupUI(); // Vinculamos los eventos de los botones
-
-        // Instanciamos el cargador GLTF
-        const loader = new GLTFLoader();
+            // CORRECCIÓN VITAL PARA MÓVILES: antialias en false y pixelRatio en 1 para evitar crasheos de memoria GPU
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
+            renderer.setPixelRatio(1); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
             
-            // ¡IMPORTANTE! Cambia 'tu_modelo.glb' por la ruta a tu archivo (ej. 'assets/dinosaurio.glb')
+            document.body.appendChild(renderer.domElement);
+            
+            const arOptions = {
+                optionalFeatures: ['dom-overlay'],
+                domOverlay: { root: document.getElementById('ar-ui') }
+            };
+            document.body.appendChild(ARButton.createButton(renderer, arOptions));
+
+            // Eventos para mostrar/ocultar la UI al entrar y salir del modo Inmersivo
+            renderer.xr.addEventListener('sessionstart', () => {
+                document.getElementById('ar-ui').style.display = 'flex';
+                actualizarGaleria(); 
+                debugLog("Sesión AR Iniciada correctamente");
+            });
+            renderer.xr.addEventListener('sessionend', () => {
+                document.getElementById('ar-ui').style.display = 'none';
+                document.getElementById('gallery-modal').style.display = 'none';
+                debugLog("Sesión AR Terminada");
+            });
+
+            setupUI(); // Vinculamos los eventos de los botones
+
+            // CUBO DE SEGURIDAD: Se mostrará instantáneamente. Si lo ves, WebXR funciona.
+            const geoCubo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+            const matCubo = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+            const cuboPrueba = new THREE.Mesh(geoCubo, matCubo);
+            cuboPrueba.position.set(0, 0, -0.5);
+            scene.add(cuboPrueba);
+            debugLog("Cargando entorno y modelos...");
+
+            // Instanciamos el cargador GLTF
+            const loader = new GLTFLoader();
+            
+            // ¡IMPORTANTE! Cambia 'tu_modelo.glb' por la ruta a tu archivo
             loader.load('assets/egg.glb', function (gltf) {
                 modelo3D = gltf.scene;
                 
-                // Escala el modelo (los modelos .glb a veces son gigantes o minúsculos por defecto)
+                // Escala el modelo
                 modelo3D.scale.set(0.1, 0.1, 0.1); 
-                // Colócalo frente a la cámara (Z negativo es hacia adelante) y un poco abajo (Y negativo)
                 modelo3D.position.set(0, -0.2, -1); 
                 
                 scene.add(modelo3D);
+                
+                cuboPrueba.visible = false; // Ocultamos el cubo verde si el modelo cargó bien
+                debugLog("Modelo 3D cargado con éxito");
 
                 // Si tu modelo tiene animaciones incluidas, las reproducimos
                 if (gltf.animations && gltf.animations.length) {
@@ -276,6 +298,7 @@
                     });
                 }
             }, undefined, function (error) {
+                debugLog('Error en modelo .glb. Revisa la consola o la ruta.');
                 console.error('Ocurrió un error al cargar el modelo .glb:', error);
             });
 
