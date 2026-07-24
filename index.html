@@ -374,19 +374,20 @@
             modalGallery.style.display = 'none';
         });
 
-            // --- Acción: Descargar Foto ---
-            btnDownload.addEventListener('click', () => {
-                if (galeriaImagenes.length === 0) {
-                    console.log('No hay fotos para descargar');
-                    return;
-                }
-                // Descarga la foto más reciente capturada
-                const link = document.createElement('a');
-                link.download = 'mi-captura-ar.png';
-                link.href = galeriaImagenes[galeriaImagenes.length - 1];
-                link.click();
-            });
-        
+        // --- Acción: Descargar Foto ---
+        btnDownload.addEventListener('click', () => {
+            if (galeriaImagenes.length === 0) {
+                console.log('No hay fotos para descargar');
+                return;
+            }
+            // Descarga la foto más reciente capturada
+            const link = document.createElement('a');
+            link.download = 'mi-captura-ar.png';
+            link.href = galeriaImagenes[galeriaImagenes.length - 1];
+            link.click();
+        });
+
+    // ELIMINADA LA LLAVE EXTRA } QUE ROMPÍA EL CÓDIGO
 
     // --- Acción: Refrescar la cuadrícula de fotos ---
     function actualizarGaleria() {
