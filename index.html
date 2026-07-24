@@ -23,7 +23,6 @@
             pointer-events: none;
             z-index: 10;
             display: flex; 
-            /* Hemos removido visibility: hidden para que la UI siempre esté activa y la puedas probar sin entrar a AR */
             flex-direction: column;
             justify-content: flex-end;
             transition: opacity 0.3s ease;
@@ -149,7 +148,6 @@
             pointer-events: none !important;
         }
 
-        /* Nueva clase para mostrar y ocultar el carrusel de forma segura */
         .show-carousel {
             display: flex !important;
         }
@@ -184,7 +182,6 @@
 </head>
 <body>
     <div id="ar-ui">
-        
         <!-- Mensaje flotante de captura -->
         <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
 
@@ -195,13 +192,13 @@
                 <button id="btn-close-carousel">&times;</button>
             </div>
             <div id="model-carousel">
-                <!-- Los botones con SVG se inyectan dinámicamente -->
+                <!-- Los botones se inyectan aquí dinámicamente -->
             </div>
         </div>
 
         <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
-            <!-- Botón de Reposicionar (Lógica visual) -->
+            <!-- Botón de Reposicionar -->
             <button class="icon-btn" id="btn-reposition">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
             </button>
@@ -213,7 +210,6 @@
             
             <!-- Botón de Modelos (Abre el carrusel) -->
             <button class="icon-btn" id="btn-models">
-                <!-- Ícono de 3D / Capas -->
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
             </button>
         </div>
@@ -224,13 +220,22 @@
         import { ARButton } from 'three/addons/webxr/ARButton.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // 1. DECLARACIÓN DE VARIABLES GLOBALES
         let camera, scene, renderer;
         let modelo3D, mixer; 
         const clock = new THREE.Clock(); 
-        const loader = new GLTFLoader(); // Declarado global para reusarlo al cambiar modelos
+        const loader = new GLTFLoader();
 
-        // CONFIGURACIÓN DE TUS MODELOS
-        // He restaurado tu modelo original 'assets/egg.glb' para que cargue inmediatamente.
+        // 2. OBTENER REFERENCIAS DEL DOM (Se hace al principio para evitar errores)
+        const btnCapture = document.getElementById('btn-capture');
+        const bottomBar = document.getElementById('bottom-bar');
+        const toastMessage = document.getElementById('toast-message');
+        const btnModels = document.getElementById('btn-models');
+        const carouselContainer = document.getElementById('model-carousel-container');
+        const btnCloseCarousel = document.getElementById('btn-close-carousel');
+        const carouselDiv = document.getElementById('model-carousel');
+
+        // 3. CONFIGURACIÓN DE MODELOS
         const modelosDisponibles = [
             { 
                 id: 'huevo', 
@@ -240,7 +245,7 @@
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
             },
             { 
-                id: 'pato', 
+                id: 'pato_prueba', 
                 url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
                 scale: 0.5, 
                 positionY: -0.2,
@@ -248,6 +253,7 @@
             }
         ];
 
+        // 4. INICIALIZACIÓN
         init();
         animate();
 
@@ -263,46 +269,37 @@
             luzDireccional.position.set(1, 2, 1);
             scene.add(luzDireccional);
 
-            // Configuración optimizada para AR en móviles
+            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
             renderer.setPixelRatio(1); 
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(0x000000, 0); 
             renderer.xr.enabled = true;
-            
             document.body.appendChild(renderer.domElement);
             
-            // Botón de WebXR con DOM Overlay para permitir UI HTML sobre el canvas 3D
+            // Botón AR con DOM Overlay
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
             };
             document.body.appendChild(ARButton.createButton(renderer, arOptions));
 
-            // Gestión de visibilidad de la interfaz al iniciar/cerrar sesión AR
-            renderer.xr.addEventListener('sessionstart', () => {
-                const ui = document.getElementById('ar-ui');
-                ui.style.visibility = 'visible';
-                ui.style.opacity = '1';
-            });
-            
+            // Gestión de visibilidad del carrusel al salir de AR
             renderer.xr.addEventListener('sessionend', () => {
-                // Al salir del AR, solo cerramos el carrusel pero dejamos los botones visibles
-                document.getElementById('model-carousel-container').classList.remove('show-carousel');
+                carouselContainer.classList.remove('show-carousel');
             });
 
-            // Cargar el primer modelo de la lista por defecto
+            // Llenar el carrusel con botones antes de cargar el primer modelo
+            construirCarrusel();
+
+            // Cargar modelo inicial
             cargarModelo(modelosDisponibles[0]);
            
             window.addEventListener('resize', onWindowResize, false);
-            
-            // Inicializar la interfaz del carrusel de modelos
-            construirCarrusel();
         }
 
-        // Función reutilizable para cambiar modelos de forma eficiente
         function cargarModelo(modeloConfig) {
-            // 1. Limpiar modelo anterior si existe para liberar memoria
+            // Limpiar anterior
             if (modelo3D) {
                 scene.remove(modelo3D);
             }
@@ -311,18 +308,16 @@
                 mixer = null;
             }
 
-            console.log("Iniciando carga de modelo:", modeloConfig.id);
+            console.log("Cargando: ", modeloConfig.url);
 
-            // 2. Cargar nuevo modelo desde la URL configurada
+            // Cargar nuevo
             loader.load(modeloConfig.url, function (gltf) {
                 modelo3D = gltf.scene;
                 modelo3D.scale.set(modeloConfig.scale, modeloConfig.scale, modeloConfig.scale); 
                 modelo3D.position.set(0, modeloConfig.positionY, -1); 
                 scene.add(modelo3D);
                 
-                console.log("Modelo cargado con éxito");
-                
-                // Reproducir animaciones automáticas si el modelo las incluye
+                // Animaciones
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(modelo3D);
                     gltf.animations.forEach((clip) => {
@@ -330,17 +325,14 @@
                     });
                 }
             }, undefined, function (error) {
-                console.error("Error al cargar el modelo 3D:", error);
-                
-                // Mostrar error en la pantalla si falla la ruta
-                const toast = document.getElementById('toast-message');
-                const textoOriginal = toast.innerText;
-                toast.innerText = "Error: No se encontró el archivo .glb en esa ruta.";
-                toast.style.opacity = '1';
+                console.error("Error al cargar el modelo:", error);
+                const textoOriginal = toastMessage.innerText;
+                toastMessage.innerText = "Error cargando modelo";
+                toastMessage.style.opacity = '1';
                 setTimeout(() => { 
-                    toast.style.opacity = '0'; 
-                    setTimeout(() => { toast.innerText = textoOriginal; }, 300);
-                }, 4000);
+                    toastMessage.style.opacity = '0'; 
+                    setTimeout(() => { toastMessage.innerText = textoOriginal; }, 300);
+                }, 3000);
             });
         }
 
@@ -360,78 +352,59 @@
             renderer.render(scene, camera);
         }
 
-        // Referencias del DOM 
-        const btnCapture = document.getElementById('btn-capture');
-        const bottomBar = document.getElementById('bottom-bar');
-        const toastMessage = document.getElementById('toast-message');
-        
-        const btnModels = document.getElementById('btn-models');
-        const carouselContainer = document.getElementById('model-carousel-container');
-        const btnCloseCarousel = document.getElementById('btn-close-carousel');
-        const carouselDiv = document.getElementById('model-carousel');
-
-        // Lógica de "Modo Captura de Pantalla" (Tiempos separados)
+        // 5. EVENTOS DE LOS BOTONES
         let toastTimeout;
         let uiTimeout;
 
+        // Botón Capturar (Limpiar pantalla)
         btnCapture.addEventListener('click', () => {
-            // 1. Ocultar la barra inferior y el carrusel inmediatamente
             bottomBar.classList.add('hide-for-capture');
             carouselContainer.classList.add('hide-for-capture');
+            carouselContainer.classList.remove('show-carousel'); // Asegurar cierre del carrusel
             
-            // 2. Mostrar mensaje indicando que tomen la captura nativa
             toastMessage.style.opacity = '1';
-
-            // Limpiamos contadores previos por si pulsa repetidas veces
             clearTimeout(toastTimeout);
             clearTimeout(uiTimeout);
 
-            // 3. Ocultar el mensaje a los 2.5 segundos (deja la pantalla limpia)
             toastTimeout = setTimeout(() => {
                 toastMessage.style.opacity = '0';
             }, 2500);
 
-            // 4. Restaurar la interfaz (botones) a los 8 segundos
             uiTimeout = setTimeout(() => {
                 bottomBar.classList.remove('hide-for-capture');
                 carouselContainer.classList.remove('hide-for-capture');
             }, 8000);
         });
 
-        // Lógica del Carrusel (Mostrar/Ocultar)
+        // Botón Abrir Carrusel
         btnModels.addEventListener('click', () => {
-            // Usamos toggle con una clase CSS en lugar de estilos en línea para evitar bugs
             carouselContainer.classList.toggle('show-carousel');
         });
 
+        // Botón Cerrar Carrusel
         btnCloseCarousel.addEventListener('click', () => {
             carouselContainer.classList.remove('show-carousel');
         });
 
-        // Generar dinámicamente los botones del carrusel basándonos en el arreglo de configuración
+        // Generar botones dentro del carrusel
         function construirCarrusel() {
+            carouselDiv.innerHTML = ''; // Limpiar por si acaso
             modelosDisponibles.forEach((modelo, index) => {
                 const btnItem = document.createElement('div');
                 btnItem.className = 'model-option';
-                if (index === 0) btnItem.classList.add('active'); // Primero activo por defecto
+                if (index === 0) btnItem.classList.add('active');
                 
-                // Inyectar el SVG configurado
                 btnItem.innerHTML = modelo.svg;
 
-                // Evento al tocar un modelo del carrusel
                 btnItem.addEventListener('click', () => {
-                    // Actualizar estilos activos visualmente
                     document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
                     btnItem.classList.add('active');
-                    
-                    // Cargar el modelo 3D correspondiente
                     cargarModelo(modelo);
                 });
 
                 carouselDiv.appendChild(btnItem);
             });
         }
-
     </script>
 </body>
 </html>
