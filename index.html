@@ -290,7 +290,6 @@
             scene.add(cuboPrueba);
             debugLog("Cargando entorno...");
 
-            /* --- MODO SEGURO: DESACTIVAMOS TU MODELO TEMPORALMENTE ---
             const loader = new GLTFLoader();
             loader.load('assets/egg.glb', function (gltf) {
                 modelo3D = gltf.scene;
@@ -309,7 +308,7 @@
             }, undefined, function (error) {
                 debugLog('Error en modelo .glb.');
             });
-            ---------------------------------------------------------- */
+           
 
             window.addEventListener('resize', onWindowResize, false);
         }
