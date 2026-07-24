@@ -1,54 +1,61 @@
-        import * as THREE from 'three';
+  import * as THREE from 'three';
         import { ARButton } from 'three/addons/webxr/ARButton.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         let camera, scene, renderer;
         let modelo3D;
+        let mixer; // Controlador para las animaciones del modelo
+        const clock = new THREE.Clock(); // Necesario para calcular el tiempo de las animaciones
 
         init();
         animate();
 
         function init() {
-            // 1. Crear la Escena
             scene = new THREE.Scene();
 
-            // 2. Configurar la Cámara Virtual
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-            // 3. Añadir Iluminación para que el modelo se vea bien
-            const luzAmbiental = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-            luzAmbiental.position.set(0.5, 1, 0.25);
+            // Luces mejoradas para modelos 3D texturizados
+            const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
             scene.add(luzAmbiental);
+            
+            const luzDireccional = new THREE.DirectionalLight(0xffffff, 2);
+            luzDireccional.position.set(1, 2, 1);
+            scene.add(luzDireccional);
 
-            // 4. Configurar el Renderizador
-            // IMPORTANTE: alpha: true permite que el fondo sea transparente para ver la cámara real
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            // Habilitamos WebXR en el renderizador
             renderer.xr.enabled = true;
+            
             document.body.appendChild(renderer.domElement);
-
-            // 5. Añadir el botón oficial de WebXR
-            // Este botón gestiona automáticamente el permiso de cámara y la sesión 'immersive-ar'
             document.body.appendChild(ARButton.createButton(renderer));
 
-            // 6. Crear un modelo 3D (Un Icosaedro flotante)
-            const geometria = new THREE.IcosahedronGeometry(0.1, 1); // Radio de 10cm
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x00ff88,
-                shininess: 10,
-                flatShading: true,
-                transparent: true,
-                opacity: 0.9
-            });
+            // Instanciamos el cargador GLTF
+            const loader = new GLTFLoader();
             
-            modelo3D = new THREE.Mesh(geometria, material);
-            // Lo posicionamos medio metro frente a la cámara (Z: -0.5)
-            modelo3D.position.set(0, 0, -0.5); 
-            scene.add(modelo3D);
+            // ¡IMPORTANTE! Cambia 'tu_modelo.glb' por la ruta a tu archivo (ej. 'assets/dinosaurio.glb')
+            loader.load('assets/egg.glb', function (gltf) {
+                modelo3D = gltf.scene;
+                
+                // Escala el modelo (los modelos .glb a veces son gigantes o minúsculos por defecto)
+                modelo3D.scale.set(0.1, 0.1, 0.1); 
+                // Colócalo frente a la cámara (Z negativo es hacia adelante) y un poco abajo (Y negativo)
+                modelo3D.position.set(0, -0.2, -1); 
+                
+                scene.add(modelo3D);
 
-            // Manejar redimensionamiento de pantalla
+                // Si tu modelo tiene animaciones incluidas, las reproducimos
+                if (gltf.animations && gltf.animations.length) {
+                    mixer = new THREE.AnimationMixer(modelo3D);
+                    gltf.animations.forEach((clip) => {
+                        mixer.clipAction(clip).play();
+                    });
+                }
+            }, undefined, function (error) {
+                console.error('Ocurrió un error al cargar el modelo .glb:', error);
+            });
+
             window.addEventListener('resize', onWindowResize, false);
         }
 
@@ -59,17 +66,21 @@
         }
 
         function animate() {
-            // Usamos setAnimationLoop en lugar de requestAnimationFrame para compatibilidad con WebXR
             renderer.setAnimationLoop(render);
         }
 
         function render() {
-            // Rotamos el modelo continuamente
+            const delta = clock.getDelta();
+
+            // Actualizar el frame de la animación si el modelo la tiene
+            if (mixer) {
+                mixer.update(delta);
+            }
+
+            // Opcional: hacemos que el modelo rote suavemente sobre su eje Y
             if (modelo3D) {
-                modelo3D.rotation.x += 0.01;
-                modelo3D.rotation.y += 0.02;
+                modelo3D.rotation.y += 0.005;
             }
             
-            // Renderizamos la escena
             renderer.render(scene, camera);
         }
