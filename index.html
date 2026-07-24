@@ -31,7 +31,12 @@
             height: 100%;
             pointer-events: none; /* Deja pasar los toques al canvas 3D */
             z-index: 10;
-            display: none; /* Se muestra solo al entrar a AR */
+            
+            /* CAMBIO CRÍTICO: Usar visibility y opacity en lugar de display: none para no romper WebXR */
+            display: flex; 
+            visibility: hidden;
+            opacity: 0;
+
             flex-direction: column;
             justify-content: flex-end;
         }
@@ -171,6 +176,9 @@
     <div id="info">Inicia la experiencia AR pulsando el botón inferior.</div>
 
     <div id="ar-ui">
+        <!-- NUEVO: Consola de depuración visible DURANTE la experiencia AR -->
+        <div id="ar-debug" style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:10px; font-size:12px; border-radius:8px; pointer-events:none;">Modo Seguro Activado...</div>
+
         <!-- Modal de Galería -->
         <div id="gallery-modal">
             <div class="modal-header">
@@ -214,9 +222,12 @@
 
         // NUEVO: Sistema de depuración en pantalla para diagnosticar el móvil
         const infoDiv = document.getElementById('info');
+        const arDebugDiv = document.getElementById('ar-debug');
+        
         function debugLog(msg) {
             console.log(msg);
             if(infoDiv) infoDiv.innerHTML = msg;
+            if(arDebugDiv) arDebugDiv.innerHTML = msg; // Lo muestra también dentro de AR
         }
         window.onerror = function(msg, url, line) {
             debugLog("Error crítico: " + msg + " (Línea " + line + ")");
@@ -242,6 +253,7 @@
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
             renderer.setPixelRatio(1); 
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0); // NUEVO: FUERZA el fondo de WebGL a ser 100% transparente
             renderer.xr.enabled = true;
             
             document.body.appendChild(renderer.domElement);
@@ -254,12 +266,16 @@
 
             // Eventos para mostrar/ocultar la UI al entrar y salir del modo Inmersivo
             renderer.xr.addEventListener('sessionstart', () => {
-                document.getElementById('ar-ui').style.display = 'flex';
+                const ui = document.getElementById('ar-ui');
+                ui.style.visibility = 'visible';
+                ui.style.opacity = '1';
                 actualizarGaleria(); 
-                debugLog("Sesión AR Iniciada correctamente");
+                debugLog("AR Iniciada. ¿Ves el cubo y la cámara?");
             });
             renderer.xr.addEventListener('sessionend', () => {
-                document.getElementById('ar-ui').style.display = 'none';
+                const ui = document.getElementById('ar-ui');
+                ui.style.visibility = 'hidden';
+                ui.style.opacity = '0';
                 document.getElementById('gallery-modal').style.display = 'none';
                 debugLog("Sesión AR Terminada");
             });
@@ -272,25 +288,18 @@
             const cuboPrueba = new THREE.Mesh(geoCubo, matCubo);
             cuboPrueba.position.set(0, 0, -0.5);
             scene.add(cuboPrueba);
-            debugLog("Cargando entorno y modelos...");
+            debugLog("Cargando entorno...");
 
-            // Instanciamos el cargador GLTF
+            /* --- MODO SEGURO: DESACTIVAMOS TU MODELO TEMPORALMENTE ---
             const loader = new GLTFLoader();
-            
-            // ¡IMPORTANTE! Cambia 'tu_modelo.glb' por la ruta a tu archivo
             loader.load('assets/egg.glb', function (gltf) {
                 modelo3D = gltf.scene;
-                
-                // Escala el modelo
                 modelo3D.scale.set(0.1, 0.1, 0.1); 
                 modelo3D.position.set(0, -0.2, -1); 
-                
                 scene.add(modelo3D);
-                
-                cuboPrueba.visible = false; // Ocultamos el cubo verde si el modelo cargó bien
+                cuboPrueba.visible = false; 
                 debugLog("Modelo 3D cargado con éxito");
 
-                // Si tu modelo tiene animaciones incluidas, las reproducimos
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(modelo3D);
                     gltf.animations.forEach((clip) => {
@@ -298,9 +307,9 @@
                     });
                 }
             }, undefined, function (error) {
-                debugLog('Error en modelo .glb. Revisa la consola o la ruta.');
-                console.error('Ocurrió un error al cargar el modelo .glb:', error);
+                debugLog('Error en modelo .glb.');
             });
+            ---------------------------------------------------------- */
 
             window.addEventListener('resize', onWindowResize, false);
         }
@@ -316,29 +325,29 @@
         }
 
         function render() {
-            const delta = clock.getDelta();
+            try {
+                const delta = clock.getDelta();
 
-            // Actualizar el frame de la animación si el modelo la tiene
-        if (mixer) {
-            mixer.update(delta);
+                if (mixer) {
+                    mixer.update(delta);
+                }
+
+                renderer.render(scene, camera);
+            
+                if (solicitarCaptura) {
+                    const imgData = renderer.domElement.toDataURL('image/png');
+                    galeriaImagenes.push(imgData);
+                    actualizarGaleria();
+                    solicitarCaptura = false;
+                }
+            } catch (e) {
+                // Si el renderizador colapsa, capturamos el error aquí
+                debugLog("CRASH EN RENDER: " + e.message);
+                renderer.setAnimationLoop(null); 
+            }
         }
 
-       
-        renderer.render(scene, camera);
-    
-        // NUEVO: Tomamos la foto exactamente después de renderizar, si el botón lo pidió
-        if (solicitarCaptura) {
-            const imgData = renderer.domElement.toDataURL('image/png');
-            galeriaImagenes.push(imgData);
-            actualizarGaleria();
-            solicitarCaptura = false; // Apagamos la bandera
-        }
-    }
-
-    const galeriaImagenes = [];
-
-    function setupUI() {
-        const btnCapture = document.getElementById('btn-capture');
+        const galeriaImagenes = [];
         const btnGallery = document.getElementById('btn-gallery');
         const btnCloseGallery = document.getElementById('btn-close-gallery');
         const modalGallery = document.getElementById('gallery-modal');
@@ -365,19 +374,19 @@
             modalGallery.style.display = 'none';
         });
 
-        // --- Acción: Descargar Foto ---
-        btnDownload.addEventListener('click', () => {
-            if (galeriaImagenes.length === 0) {
-                console.log('No hay fotos para descargar');
-                return;
-            }
-            // Descarga la foto más reciente capturada
-            const link = document.createElement('a');
-            link.download = 'mi-captura-ar.png';
-            link.href = galeriaImagenes[galeriaImagenes.length - 1];
-            link.click();
-        });
-    }
+            // --- Acción: Descargar Foto ---
+            btnDownload.addEventListener('click', () => {
+                if (galeriaImagenes.length === 0) {
+                    console.log('No hay fotos para descargar');
+                    return;
+                }
+                // Descarga la foto más reciente capturada
+                const link = document.createElement('a');
+                link.download = 'mi-captura-ar.png';
+                link.href = galeriaImagenes[galeriaImagenes.length - 1];
+                link.click();
+            });
+        
 
     // --- Acción: Refrescar la cuadrícula de fotos ---
     function actualizarGaleria() {
