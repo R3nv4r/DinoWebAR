@@ -209,6 +209,9 @@
         let mixer; // Controlador para las animaciones del modelo
         const clock = new THREE.Clock(); // Necesario para calcular el tiempo de las animaciones
 
+        // NUEVO: Bandera para controlar cuándo tomar la foto
+        let solicitarCaptura = false; 
+
         init();
         animate();
 
@@ -225,8 +228,8 @@
         luzDireccional.position.set(1, 2, 1);
         scene.add(luzDireccional);
 
-        // preserveDrawingBuffer es VITAL para que toDataURL() funcione y no devuelva negro
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); 
+        // CORRECCIÓN: Quitamos preserveDrawingBuffer: true porque congela WebXR en móviles
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.xr.enabled = true;
@@ -300,6 +303,13 @@
        
         renderer.render(scene, camera);
     
+        // NUEVO: Tomamos la foto exactamente después de renderizar, si el botón lo pidió
+        if (solicitarCaptura) {
+            const imgData = renderer.domElement.toDataURL('image/png');
+            galeriaImagenes.push(imgData);
+            actualizarGaleria();
+            solicitarCaptura = false; // Apagamos la bandera
+        }
     }
 
     const galeriaImagenes = [];
@@ -318,10 +328,8 @@
             overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
             setTimeout(() => { overlay.style.backgroundColor = 'transparent'; }, 150);
 
-            // Capturar el modelo 3D renderizado
-            const imgData = renderer.domElement.toDataURL('image/png');
-            galeriaImagenes.push(imgData);
-            actualizarGaleria();
+            // CORRECCIÓN: Activamos la bandera para que capture en el siguiente frame del motor 3D
+            solicitarCaptura = true;
         });
 
         // --- Acción: Abrir Galería ---
