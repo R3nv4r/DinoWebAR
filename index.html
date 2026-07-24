@@ -23,8 +23,7 @@
             pointer-events: none;
             z-index: 10;
             display: flex; 
-            visibility: hidden;
-            opacity: 0;
+            /* Hemos removido visibility: hidden para que la UI siempre esté activa y la puedas probar sin entrar a AR */
             flex-direction: column;
             justify-content: flex-end;
             transition: opacity 0.3s ease;
@@ -150,6 +149,11 @@
             pointer-events: none !important;
         }
 
+        /* Nueva clase para mostrar y ocultar el carrusel de forma segura */
+        .show-carousel {
+            display: flex !important;
+        }
+
         #toast-message {
             position: absolute;
             top: 20%;
@@ -226,30 +230,21 @@
         const loader = new GLTFLoader(); // Declarado global para reusarlo al cambiar modelos
 
         // CONFIGURACIÓN DE TUS MODELOS
-        // Usando modelos públicos (Duck, Fox, Helmet) para que carguen en la previsualización.
-        // Cuando subas tu proyecto, reemplaza "url" por tus rutas (ej. 'assets/dino1.glb')
+        // He restaurado tu modelo original 'assets/egg.glb' para que cargue inmediatamente.
         const modelosDisponibles = [
+            { 
+                id: 'huevo', 
+                url: 'assets/egg.glb', 
+                scale: 0.1, 
+                positionY: -0.2,
+                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
+            },
             { 
                 id: 'pato', 
                 url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
                 scale: 0.5, 
                 positionY: -0.2,
-                // Pega tu código SVG dentro de estas comillas invertidas para cada modelo:
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
-            },
-            { 
-                id: 'zorro', 
-                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', 
-                scale: 0.015, // El zorro requiere una escala menor
-                positionY: -0.2,
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M12 2v20"></path></svg>`
-            },
-            { 
-                id: 'casco', 
-                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', 
-                scale: 0.4, 
-                positionY: -0.2,
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
+                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
             }
         ];
 
@@ -292,10 +287,8 @@
             });
             
             renderer.xr.addEventListener('sessionend', () => {
-                const ui = document.getElementById('ar-ui');
-                ui.style.visibility = 'hidden';
-                ui.style.opacity = '0';
-                document.getElementById('model-carousel-container').style.display = 'none';
+                // Al salir del AR, solo cerramos el carrusel pero dejamos los botones visibles
+                document.getElementById('model-carousel-container').classList.remove('show-carousel');
             });
 
             // Cargar el primer modelo de la lista por defecto
@@ -407,15 +400,12 @@
 
         // Lógica del Carrusel (Mostrar/Ocultar)
         btnModels.addEventListener('click', () => {
-            if(carouselContainer.style.display === 'flex') {
-                carouselContainer.style.display = 'none';
-            } else {
-                carouselContainer.style.display = 'flex';
-            }
+            // Usamos toggle con una clase CSS en lugar de estilos en línea para evitar bugs
+            carouselContainer.classList.toggle('show-carousel');
         });
 
         btnCloseCarousel.addEventListener('click', () => {
-            carouselContainer.style.display = 'none';
+            carouselContainer.classList.remove('show-carousel');
         });
 
         // Generar dinámicamente los botones del carrusel basándonos en el arreglo de configuración
