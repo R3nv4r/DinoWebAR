@@ -25,7 +25,32 @@
             display: flex; 
             flex-direction: column;
             justify-content: flex-end;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Clase para revelar la interfaz cuando inicia AR */
+        #ar-ui.ar-active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #btn-exit-ar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: auto; /* Importante para que pueda ser clickeado */
+            z-index: 20;
         }
 
         #bottom-bar {
@@ -182,6 +207,11 @@
 </head>
 <body>
     <div id="ar-ui">
+        <!-- Botón de Salir (X) -->
+        <button id="btn-exit-ar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
         <!-- Mensaje flotante de captura -->
         <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
 
@@ -227,6 +257,8 @@
         const loader = new GLTFLoader();
 
         // 2. OBTENER REFERENCIAS DEL DOM (Se hace al principio para evitar errores)
+        const arUI = document.getElementById('ar-ui');
+        const btnExitAR = document.getElementById('btn-exit-ar');
         const btnCapture = document.getElementById('btn-capture');
         const bottomBar = document.getElementById('bottom-bar');
         const toastMessage = document.getElementById('toast-message');
@@ -259,6 +291,8 @@
 
         function init() {
             scene = new THREE.Scene();
+            scene.visible = false; // Ocultar todo el mundo 3D hasta iniciar AR
+
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
             // Iluminación
@@ -284,9 +318,16 @@
             };
             document.body.appendChild(ARButton.createButton(renderer, arOptions));
 
-            // Gestión de visibilidad del carrusel al salir de AR
+            // Gestión de visibilidad al entrar y salir de AR
+            renderer.xr.addEventListener('sessionstart', () => {
+                arUI.classList.add('ar-active'); // Mostrar interfaz
+                scene.visible = true; // Mostrar el modelo 3D
+            });
+
             renderer.xr.addEventListener('sessionend', () => {
-                carouselContainer.classList.remove('show-carousel');
+                arUI.classList.remove('ar-active'); // Ocultar interfaz
+                carouselContainer.classList.remove('show-carousel'); // Asegurar que el carrusel se cierre
+                scene.visible = false; // Ocultar el modelo 3D
             });
 
             // Llenar el carrusel con botones antes de cargar el primer modelo
@@ -355,6 +396,14 @@
         // 5. EVENTOS DE LOS BOTONES
         let toastTimeout;
         let uiTimeout;
+
+        // Botón Salir de AR (X)
+        btnExitAR.addEventListener('click', () => {
+            const session = renderer.xr.getSession();
+            if (session) {
+                session.end(); // Finaliza la sesión WebXR
+            }
+        });
 
         // Botón Capturar (Limpiar pantalla)
         btnCapture.addEventListener('click', () => {
