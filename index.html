@@ -226,27 +226,28 @@
         const loader = new GLTFLoader(); // Declarado global para reusarlo al cambiar modelos
 
         // CONFIGURACIÓN DE TUS MODELOS
-        // Aquí puedes agregar todos los dinosaurios/objetos que quieras
+        // Usando modelos públicos (Duck, Fox, Helmet) para que carguen en la previsualización.
+        // Cuando subas tu proyecto, reemplaza "url" por tus rutas (ej. 'assets/dino1.glb')
         const modelosDisponibles = [
             { 
-                id: 'egg', 
-                url: 'assets/egg.glb', 
-                scale: 0.1, 
+                id: 'pato', 
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
+                scale: 0.5, 
                 positionY: -0.2,
                 // Pega tu código SVG dentro de estas comillas invertidas para cada modelo:
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
             },
             { 
-                id: 'dino1', 
-                url: 'assets/dino1.glb', // Cambia a la ruta real de tu modelo
-                scale: 0.1, 
+                id: 'zorro', 
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', 
+                scale: 0.015, // El zorro requiere una escala menor
                 positionY: -0.2,
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M12 2v20"></path></svg>`
             },
             { 
-                id: 'dino2', 
-                url: 'assets/dino2.glb', // Cambia a la ruta real de tu modelo
-                scale: 0.1, 
+                id: 'casco', 
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', 
+                scale: 0.4, 
                 positionY: -0.2,
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
             }
@@ -317,12 +318,16 @@
                 mixer = null;
             }
 
+            console.log("Iniciando carga de modelo:", modeloConfig.id);
+
             // 2. Cargar nuevo modelo desde la URL configurada
             loader.load(modeloConfig.url, function (gltf) {
                 modelo3D = gltf.scene;
                 modelo3D.scale.set(modeloConfig.scale, modeloConfig.scale, modeloConfig.scale); 
                 modelo3D.position.set(0, modeloConfig.positionY, -1); 
                 scene.add(modelo3D);
+                
+                console.log("Modelo cargado con éxito");
                 
                 // Reproducir animaciones automáticas si el modelo las incluye
                 if (gltf.animations && gltf.animations.length) {
@@ -333,6 +338,16 @@
                 }
             }, undefined, function (error) {
                 console.error("Error al cargar el modelo 3D:", error);
+                
+                // Mostrar error en la pantalla si falla la ruta
+                const toast = document.getElementById('toast-message');
+                const textoOriginal = toast.innerText;
+                toast.innerText = "Error: No se encontró el archivo .glb en esa ruta.";
+                toast.style.opacity = '1';
+                setTimeout(() => { 
+                    toast.style.opacity = '0'; 
+                    setTimeout(() => { toast.innerText = textoOriginal; }, 300);
+                }, 4000);
             });
         }
 
