@@ -37,6 +37,14 @@
             padding: 30px;
             pointer-events: auto;
             padding-bottom: 50px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Clase para ocultar la barra inferior durante la captura */
+        .hide-for-capture {
+            opacity: 0;
+            pointer-events: none !important;
+            transform: translateY(20px);
         }
 
         .icon-btn {
@@ -69,6 +77,24 @@
             height: 50px;
             border-radius: 50%;
             background-color: #000;
+        }
+
+        /* Notificación flotante (Toast) para avisar al usuario */
+        #toast-message {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            text-align: center;
         }
 
         #gallery-modal {
@@ -108,47 +134,12 @@
             cursor: pointer;
             color: #333;
         }
-
-        #gallery-grid {
-            flex-grow: 1;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            align-content: start;
-        }
-
-        .gallery-item {
-            width: 100%;
-            aspect-ratio: 1;
-            background-color: #e0e0e0; /* Fondo gris para resaltar el modelo 3D */
-            border-radius: 8px;
-            border: 1.5px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        #btn-download {
-            background-color: #ff8c00;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 50%;
-            margin: 0 auto;
-            display: block;
+        
+        .info-text {
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
     </style>
 
@@ -164,25 +155,26 @@
 <body>
     <div id="ar-ui">
         
-        <!-- Modal de Galería -->
+        <!-- Mensaje flotante de captura -->
+        <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
+
+        <!-- Modal de Galería (informativa en este caso) -->
         <div id="gallery-modal">
             <div class="modal-header">
                 <h2>Galería</h2>
                 <button id="btn-close-gallery">&times;</button>
             </div>
-            <div id="gallery-grid">
-                <!-- Inyectado dinámicamente -->
-            </div>
-            <button id="btn-download">Descargar Última</button>
+            <p class="info-text">En experiencias WebXR nativas, las capturas de pantalla deben realizarse utilizando los botones de tu dispositivo (Volumen Abajo + Encendido) para incluir el mundo real.</p>
         </div>
 
         <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
-            <!-- Botón de Reposicionar (Lógica pendiente para futuras fases) -->
+            <!-- Botón de Reposicionar -->
             <button class="icon-btn" id="btn-reposition">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
             </button>
             
+            <!-- Botón de captura -->
             <button id="btn-capture">
                 <div class="inner-circle"></div>
             </button>
@@ -201,9 +193,6 @@
         let camera, scene, renderer;
         let modelo3D, mixer; 
         const clock = new THREE.Clock(); 
-        
-        let solicitarCaptura = false; 
-        const galeriaImagenes = [];
 
         init();
         animate();
@@ -212,7 +201,6 @@
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-            // Iluminación
             const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
             scene.add(luzAmbiental);
             
@@ -220,7 +208,7 @@
             luzDireccional.position.set(1, 2, 1);
             scene.add(luzDireccional);
 
-            // Configuración optimizada para AR en móviles
+            // Importante: alpha: true permite ver la cámara real detrás del render
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
             renderer.setPixelRatio(1); 
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -229,19 +217,16 @@
             
             document.body.appendChild(renderer.domElement);
             
-            // Botón de WebXR con DOM Overlay
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
             };
             document.body.appendChild(ARButton.createButton(renderer, arOptions));
 
-            // Gestión de visibilidad de la interfaz
             renderer.xr.addEventListener('sessionstart', () => {
                 const ui = document.getElementById('ar-ui');
                 ui.style.visibility = 'visible';
                 ui.style.opacity = '1';
-                actualizarGaleria(); 
             });
             
             renderer.xr.addEventListener('sessionend', () => {
@@ -252,14 +237,12 @@
             });
 
             const loader = new GLTFLoader();
-            // Asegúrate de usar la ruta correcta hacia tu modelo de dinosaurio
             loader.load('assets/egg.glb', function (gltf) {
                 modelo3D = gltf.scene;
-                modelo3D.scale.set(0.1, 0.1, 0.1); // Ajusta la escala según necesites
+                modelo3D.scale.set(0.1, 0.1, 0.1); 
                 modelo3D.position.set(0, -0.2, -1); 
                 scene.add(modelo3D);
                 
-                // Reproducir animaciones si las tiene
                 if (gltf.animations && gltf.animations.length) {
                     mixer = new THREE.AnimationMixer(modelo3D);
                     gltf.animations.forEach((clip) => {
@@ -285,87 +268,44 @@
 
         function render() {
             const delta = clock.getDelta();
-
-            if (mixer) {
-                mixer.update(delta);
-            }
-
+            if (mixer) mixer.update(delta);
             renderer.render(scene, camera);
-        
-            // Lógica de captura limpia sincronizada con el render
-            if (solicitarCaptura) {
-                const imgData = renderer.domElement.toDataURL('image/png');
-                galeriaImagenes.push(imgData);
-                actualizarGaleria();
-                
-                // Descarga automática de la captura
-                const link = document.createElement('a');
-                link.download = `AR_Dino_${Date.now()}.png`;
-                link.href = imgData;
-                link.click();
-
-                solicitarCaptura = false;
-            }
         }
 
         // Referencias del DOM
         const btnCapture = document.getElementById('btn-capture');
+        const bottomBar = document.getElementById('bottom-bar');
+        const toastMessage = document.getElementById('toast-message');
         const btnGallery = document.getElementById('btn-gallery');
         const btnCloseGallery = document.getElementById('btn-close-gallery');
         const modalGallery = document.getElementById('gallery-modal');
-        const btnDownload = document.getElementById('btn-download');
 
-        // Evento: Botón Central de Captura
+        // Lógica de "Modo Captura de Pantalla"
+        let captureTimeout;
         btnCapture.addEventListener('click', () => {
-            // Flash visual blanco
-            const overlay = document.getElementById('ar-ui');
-            overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-            setTimeout(() => { overlay.style.backgroundColor = 'transparent'; }, 150);
+            // 1. Ocultar la barra inferior de UI
+            bottomBar.classList.add('hide-for-capture');
+            
+            // 2. Mostrar mensaje indicando que tomen la captura
+            toastMessage.style.opacity = '1';
 
-            solicitarCaptura = true;
+            // 3. Restaurar todo después de 5 segundos
+            clearTimeout(captureTimeout);
+            captureTimeout = setTimeout(() => {
+                toastMessage.style.opacity = '0';
+                bottomBar.classList.remove('hide-for-capture');
+            }, 5000);
         });
 
-        // Evento: Abrir Galería
+        // Eventos de la galería
         btnGallery.addEventListener('click', () => {
             modalGallery.style.display = 'flex';
         });
 
-        // Evento: Cerrar Galería
         btnCloseGallery.addEventListener('click', () => {
             modalGallery.style.display = 'none';
         });
 
-        // Evento: Descargar Manual desde Galería
-        btnDownload.addEventListener('click', () => {
-            if (galeriaImagenes.length === 0) return;
-            const link = document.createElement('a');
-            link.download = `AR_Dino_Galeria_${Date.now()}.png`;
-            link.href = galeriaImagenes[galeriaImagenes.length - 1];
-            link.click();
-        });
-
-        function actualizarGaleria() {
-            const grid = document.getElementById('gallery-grid');
-            if(!grid) return;
-            
-            grid.innerHTML = ''; 
-
-            // Mostrar cuadrícula de 8 espacios
-            for (let i = 0; i < 8; i++) {
-                const item = document.createElement('div');
-                item.className = 'gallery-item';
-                
-                if (i < galeriaImagenes.length) {
-                    const img = document.createElement('img');
-                    img.src = galeriaImagenes[i];
-                    item.appendChild(img);
-                } else {
-                    // Ícono predeterminado para vacíos
-                    item.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-                }
-                grid.appendChild(item);
-            }
-        }
     </script>
 </body>
 </html>
