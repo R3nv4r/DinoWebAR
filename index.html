@@ -333,7 +333,7 @@
                     actualizarGaleria();
                     solicitarCaptura = false;
                 }
-            } catch (e) {
+                 } catch (e) {
                 // Si el renderizador colapsa, capturamos el error aquí
                 debugLog("CRASH EN RENDER: " + e.message);
                 renderer.setAnimationLoop(null); 
@@ -357,6 +357,78 @@
             // Activamos la bandera para que capture en el siguiente frame
             solicitarCaptura = true;
         });
+
+        // --- Acción: Abrir Galería ---
+        btnGallery.addEventListener('click', () => {
+            modalGallery.style.display = 'flex';
+        });
+
+        // --- Acción: Cerrar Galería ---
+        btnCloseGallery.addEventListener('click', () => {
+            modalGallery.style.display = 'none';
+        });
+
+        // --- Acción: Descargar Foto ---
+        btnDownload.addEventListener('click', () => {
+            if (galeriaImagenes.length === 0) {
+                console.log('No hay fotos para descargar');
+                return;
+            }
+            // Descarga la foto más reciente capturada
+            const link = document.createElement('a');
+            link.download = 'mi-captura-ar.png';
+            link.href = galeriaImagenes[galeriaImagenes.length - 1];
+            link.click();
+        });
+
+    // --- Acción: Refrescar la cuadrícula de fotos ---
+    function actualizarGaleria() {
+        // Buscamos la cuadrícula (asegúrate de que en tu HTML la clase sea gallery-grid)
+        const grid = document.querySelector('.gallery-grid');
+        if (!grid) return;
+        
+        // Obtenemos los 8 espacios de la galería
+        const slots = grid.querySelectorAll('div');
+        
+        for (let i = 0; i < slots.length; i++) {
+            // Queremos que la última foto tomada sea la primera en verse
+            const fotoIndex = galeriaImagenes.length - 1 - i;
+            
+            if (galeriaImagenes[fotoIndex]) {
+                // AÑADIDO: background-color para que el 3D se vea aunque el fondo sea transparente
+                slots[i].innerHTML = `<img src="${galeriaImagenes[fotoIndex]}" style="width:100%; height:100%; object-fit:contain; background-color:#e0e0e0; border-radius:8px;">`;
+            } else {
+                // Restauramos el icono vacío original si no hay foto
+                slots[i].innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>`;
+            }
+        }
+    }
+
+    // --- Bucle de Animación y Renderizado ---
+    function render(timestamp, frame) {
+        const delta = clock.getDelta();
+        if (mixer) mixer.update(delta);
+        
+        renderer.render(scene, camera);
+
+        // AÑADIDO: Capturamos la foto JUSTO DESPUÉS del renderizado
+        if (solicitarCaptura) {
+            try {
+                const dataURL = renderer.domElement.toDataURL('image/png');
+                galeriaImagenes.push(dataURL);
+                actualizarGaleria();
+                debugLog("¡Foto guardada!");
+            } catch (e) {
+                debugLog("Error al guardar: " + e.message);
+            }
+            solicitarCaptura = false;
+        }
+    }
 
         // --- Acción: Abrir Galería ---
         btnGallery.addEventListener('click', () => {
