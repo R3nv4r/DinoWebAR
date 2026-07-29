@@ -65,11 +65,14 @@ import * as THREE from 'three';
             document.body.appendChild(renderer.domElement);
             
             // Botón AR con DOM Overlay
+             // Botón de WebXR con DOM Overlay
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
             };
-            document.body.appendChild(ARButton.createButton(renderer, arOptions));
+            
+            // CLAVE: Inyectar el botón en el contenedor, NO en el body
+            document.getElementById('ar-button-container').appendChild(ARButton.createButton(renderer, arOptions));
 
             // Gestión de visibilidad al entrar y salir de AR
             renderer.xr.addEventListener('sessionstart', () => {

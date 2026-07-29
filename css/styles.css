@@ -73,9 +73,25 @@ body {
             top: 0px;
         }
 
-       /* --- PERSONALIZACIÓN DEL BOTÓN AR DE THREE.JS --- */
+      /* --- NUEVO CONTENEDOR PARA EL BOTÓN --- */
+        #ar-button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            z-index: 100;
+            margin:auto
+        }
+
+        /* --- PERSONALIZACIÓN DEL BOTÓN AR DE THREE.JS --- */
         #ARButton {
-            display: flex !important; /* CLAVE 1: Fuerza a que los items internos se alineen */
+            position: static !important; 
+            transform: none !important; 
+            width: auto !important; 
+            left: auto !important;
+            bottom: auto !important;
+            opacity: 1 !important;
+            display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             background-color: #ff8c00 !important; 
@@ -84,18 +100,17 @@ body {
             border: 2px solid rgba(255, 255, 255, 0.8) !important; 
             font-weight: bold !important;
             padding: 16px 32px !important; 
-            bottom: 40px !important; 
             font-size: 0px !important; 
-            line-height: 1 !important; /* CLAVE 2: Elimina alturas de línea ocultas en móviles */
+            line-height: 1 !important; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
             transition: transform 0.2s ease, background-color 0.2s ease !important;
             letter-spacing: 1px !important;
-            white-space: nowrap !important; /* CLAVE 3: Evita que el texto baje a una segunda línea */
+            white-space: nowrap !important; 
         }
 
         /* Efecto al presionar el botón */
         #ARButton:active {
-            transform: translateX(-50%) scale(0.95) !important;
+            transform: scale(0.95) !important; /* Ajustado porque ya quitamos el translateX previo */
         }
 
         /* Texto cuando el dispositivo es compatible*/
