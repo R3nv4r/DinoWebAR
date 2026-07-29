@@ -2,6 +2,9 @@ import * as THREE from 'three';
         import { ARButton } from 'three/addons/webxr/ARButton.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        const btnCapture = document.getElementById('btn-capture');
+        const btnCloseUI = document.getElementById('btn-close-ui');
+
         // 1. DECLARACIÓN DE VARIABLES GLOBALES
         let camera, scene, renderer;
         let modelo3D, mixer; 
@@ -63,6 +66,7 @@ import * as THREE from 'three';
             renderer.setClearColor(0x000000, 0); 
             renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
+            renderer.preserveDrawingBuffer = true;
             
             // Botón AR con DOM Overlay
              // Botón de WebXR con DOM Overlay
@@ -163,24 +167,41 @@ import * as THREE from 'three';
             }
         });
 
-        // Botón Capturar (Limpiar pantalla)
+        // Evento: Botón Central de Captura (PRUEBA CON HTML2CANVAS)
         btnCapture.addEventListener('click', () => {
-            bottomBar.classList.add('hide-for-capture');
-            carouselContainer.classList.add('hide-for-capture');
-            carouselContainer.classList.remove('show-carousel'); // Asegurar cierre del carrusel
+            // Ocultar carrusel si está abierto para que no estorbe en la foto
+            document.getElementById('model-carousel').classList.remove('show-carousel');
             
-            toastMessage.style.opacity = '1';
-            clearTimeout(toastTimeout);
-            clearTimeout(uiTimeout);
+            // Flash visual blanco de la cámara
+            const overlay = document.getElementById('ar-ui');
+            const originalBg = overlay.style.backgroundColor;
+            overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            setTimeout(() => { overlay.style.backgroundColor = originalBg; }, 150);
 
-            toastTimeout = setTimeout(() => {
-                toastMessage.style.opacity = '0';
-            }, 2500);
+            // Mostrar mensaje de que está capturando (opcional)
+            const flashMsg = document.getElementById('capture-flash');
+            flashMsg.innerText = "Procesando captura...";
+            flashMsg.classList.add('show-flash');
 
-            uiTimeout = setTimeout(() => {
-                bottomBar.classList.remove('hide-for-capture');
-                carouselContainer.classList.remove('hide-for-capture');
-            }, 8000);
+            // Capturar la pantalla usando html2canvas
+            html2canvas(document.body, {
+                backgroundColor: null // Para intentar mantener la transparencia
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Descargar automáticamente la imagen
+                const link = document.createElement('a');
+                link.download = `Prueba_html2canvas_${Date.now()}.png`;
+                link.href = imgData;
+                link.click();
+
+                // Ocultar mensaje
+                setTimeout(() => { flashMsg.classList.remove('show-flash'); }, 1000);
+            }).catch(err => {
+                console.error("Error al capturar con html2canvas: ", err);
+                flashMsg.innerText = "Error al capturar";
+                setTimeout(() => { flashMsg.classList.remove('show-flash'); }, 2000);
+            });
         });
 
         // Botón Abrir Carrusel
