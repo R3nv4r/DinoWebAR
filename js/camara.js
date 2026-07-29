@@ -2,9 +2,7 @@ import * as THREE from 'three';
         import { ARButton } from 'three/addons/webxr/ARButton.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        const btnCapture = document.getElementById('btn-capture');
-        const btnCloseUI = document.getElementById('btn-close-ui');
-
+       
         // 1. DECLARACIÓN DE VARIABLES GLOBALES
         let camera, scene, renderer;
         let modelo3D, mixer; 
@@ -13,6 +11,7 @@ import * as THREE from 'three';
 
         // 2. OBTENER REFERENCIAS DEL DOM
         const welcomeScreen = document.getElementById('welcome-screen');
+        const btnCloseUI = document.getElementById('btn-close-ui');
         const arUI = document.getElementById('ar-ui');
         const btnExitAR = document.getElementById('btn-exit-ar');
         const btnCapture = document.getElementById('btn-capture');
@@ -66,7 +65,6 @@ import * as THREE from 'three';
             renderer.setClearColor(0x000000, 0); 
             renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
-            renderer.preserveDrawingBuffer = true;
             
             // Botón AR con DOM Overlay
              // Botón de WebXR con DOM Overlay
@@ -203,6 +201,7 @@ import * as THREE from 'three';
                 setTimeout(() => { flashMsg.classList.remove('show-flash'); }, 2000);
             });
         });
+
 
         // Botón Abrir Carrusel
         btnModels.addEventListener('click', () => {
