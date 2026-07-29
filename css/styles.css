@@ -1,0 +1,292 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: sans-serif;
+    }
+
+        /* --- PANTALLA DE BIENVENIDA --- */
+    #welcome-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+            width: 100%;
+            height: 100%;
+            /* Un degradado moderno y atractivo */
+            background: linear-gradient(135deg, #0cc42a 0%, #1b5700 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 5; 
+            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        
+        /* Clase para ocultar la pantalla cuando inicia AR */
+        #welcome-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-logo {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+        }
+        .welcome-logo img{
+            width:160%;
+        }
+        #welcome-screen h1 {
+            margin: 0 0 15px 0;
+            font-size: 38px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        .texto{
+            margin: 0 0 90px 0; 
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 500px;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .leyenda {
+            font-size: 1vw;
+            color: #8bf06c; 
+            margin: 0; 
+            top: 0px;
+        }
+
+       
+        /* --- PERSONALIZACIÓN DEL BOTÓN AR DE THREE.JS --- */
+        #ARButton {
+            background-color: #ff8c00 !important; 
+            color: white !important;
+            border-radius: 30px !important; 
+            border: 2px solid rgba(255, 255, 255, 0.8) !important; 
+            font-weight: bold !important;
+            padding: 16px 32px !important; 
+            bottom: 40px !important; 
+            font-size: 0px !important; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+            letter-spacing: 1px !important;
+        }
+
+        /* Efecto al presionar el botón */
+        #ARButton:active {
+            transform: translateX(-50%) scale(0.95) !important;
+        }
+
+        /* Texto cuando el dispositivo es compatible*/
+        #ARButton:not(:disabled)::after {
+            content: "¡INICIAR!"; 
+            font-size: 16px !important;
+        }
+
+        /* Texto de error si el celular del usuario no soporta AR */
+        #ARButton:disabled {
+            background-color: #555 !important;
+            border-color: #444 !important;
+        }
+        #ARButton:disabled::after {
+            content: "AR NO DISPONIBLE"; 
+            font-size: 16px !important;
+        }
+        /* --- INTERFAZ AR --- */
+        #ar-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex; 
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Clase para revelar la interfaz cuando inicia AR */
+        #ar-ui.ar-active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #btn-exit-ar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        #bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+            pointer-events: auto;
+            padding-bottom: 50px;
+            transition: opacity 0.3s ease;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #000;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #btn-capture {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 4px solid #000;
+            background-color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #btn-capture .inner-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #000;
+        }
+
+        #model-carousel-container {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: none;
+            flex-direction: column;
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .carousel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .carousel-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        #btn-close-carousel {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #333;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #model-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 5px;
+        }
+
+        .model-option {
+            flex: 0 0 70px;
+            height: 70px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .model-option.active {
+            border-color: #000;
+            background: #e0e0e0;
+            transform: scale(0.95);
+        }
+
+        .model-option svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .hide-for-capture {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .show-carousel {
+            display: flex !important;
+        }
+
+        #toast-message {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            width: 80%;
+            max-width: 300px;
+        }
