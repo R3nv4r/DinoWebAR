@@ -2,7 +2,6 @@ import * as THREE from 'three';
         import { ARButton } from 'three/addons/webxr/ARButton.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        
         // 1. DECLARACIÓN DE VARIABLES GLOBALES
         let camera, scene, renderer;
         let modelo3D, mixer; 
@@ -66,7 +65,6 @@ import * as THREE from 'three';
             document.body.appendChild(renderer.domElement);
             
             // Botón AR con DOM Overlay
-             // Botón de WebXR con DOM Overlay
             const arOptions = {
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.getElementById('ar-ui') }
