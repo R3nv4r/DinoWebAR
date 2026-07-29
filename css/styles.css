@@ -88,6 +88,7 @@ body {
             transition: transform 0.2s ease, background-color 0.2s ease !important;
             letter-spacing: 1px !important;
             justify-content: center !important;
+            align-items: center !important;
         }
 
         /* Efecto al presionar el botón */
