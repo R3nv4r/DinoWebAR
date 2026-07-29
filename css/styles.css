@@ -87,6 +87,7 @@ body {
             box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
             transition: transform 0.2s ease, background-color 0.2s ease !important;
             letter-spacing: 1px !important;
+            justify-content: center !important;
         }
 
         /* Efecto al presionar el botón */
