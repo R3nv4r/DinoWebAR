@@ -27,14 +27,14 @@ import * as THREE from 'three';
                 url: 'assets/egg.glb', 
                 scale: 0.1, 
                 positionY: -0.2,
-                svg: 'assets/huevo.svg' 
+                svgUrl: 'assets/huevo.svg'
             },
             { 
                 id: 'pato_prueba', 
                 url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
                 scale: 0.5, 
                 positionY: -0.2,
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
+                svgUrl: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
             }
         ];
 
@@ -203,7 +203,7 @@ import * as THREE from 'three';
                 btnItem.className = 'model-option';
                 if (index === 0) btnItem.classList.add('active');
                 
-                btnItem.innerHTML = modelo.svg;
+                btnItem.innerHTML = `<img src="${modelo.svgUrl}" alt="${modelo.nombre}">`;
 
                 btnItem.addEventListener('click', () => {
                     document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
