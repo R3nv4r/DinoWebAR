@@ -27,7 +27,7 @@ import * as THREE from 'three';
                 url: 'assets/egg.glb', 
                 scale: 0.1, 
                 positionY: -0.2,
-                img: `<svg
+                svg: `<svg
    width="210mm"
    height="297mm"
    viewBox="0 0 210 297"
