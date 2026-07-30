@@ -181,6 +181,7 @@ import * as THREE from 'three';
             uiTimeout = setTimeout(() => {
                 bottomBar.classList.remove('hide-for-capture');
                 carouselContainer.classList.remove('hide-for-capture');
+                 btnExitAR.classList.remove('hide-for-capture');
             }, 8000);
         });
 
