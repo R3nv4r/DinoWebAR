@@ -166,7 +166,9 @@ import * as THREE from 'three';
         btnCapture.addEventListener('click', () => {
             bottomBar.classList.add('hide-for-capture');
             carouselContainer.classList.add('hide-for-capture');
+            btnExitAR.classList.add('hide-for-capture');
             carouselContainer.classList.remove('show-carousel'); // Asegurar cierre del carrusel
+            
             
             toastMessage.style.opacity = '1';
             clearTimeout(toastTimeout);
