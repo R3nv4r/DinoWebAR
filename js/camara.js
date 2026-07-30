@@ -27,7 +27,7 @@ import * as THREE from 'three';
                 url: 'assets/egg.glb', 
                 scale: 0.1, 
                 positionY: -0.2,
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>` 
+                svg: 'assets/huevo.svg' 
             },
             { 
                 id: 'pato_prueba', 
