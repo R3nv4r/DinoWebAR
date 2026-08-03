@@ -72,7 +72,24 @@
             </button>
         </div>
     </div>
+<p>Haga clic en el botón para iniciar la captura de su pantalla.</p>
+<button id="startBtn">Iniciar captura</button>
+<video id="videoElement" autoplay playsinline></video>
 
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const videoElement = document.getElementById('videoElement');
+
+  startBtn.addEventListener('click', async () => {
+    try {
+      // Solicita permiso para capturar la pantalla
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      videoElement.srcObject = stream;
+    } catch (err) {
+      console.error("Error al capturar la pantalla: " + err);
+    }
+  });
+</script>
     <script type="module" src="js/camara.js"></script>
 </body>
 </html>
