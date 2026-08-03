@@ -14,8 +14,13 @@
         }
     </script>
     
+    <!-- 1. Agregamos el script local del motor de 8th Wall -->
+    <script src="./external/xr/xr.js"></script>
 </head>
 <body>
+    <!-- 2. Agregamos el Canvas de 8th Wall al fondo (detrás de la UI) -->
+    <canvas id="ar-canvas" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;"></canvas>
+
     <!-- PANTALLA DE BIENVENIDA -->
         
     <div id="welcome-screen">
@@ -73,6 +78,6 @@
         </div>
     </div>
 
-    <script type="module" src="js/camara.js"></script>
+    <script type="module" src="js/8thwall.js"></script>
 </body>
 </html>
