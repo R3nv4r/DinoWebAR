@@ -60,7 +60,7 @@
       <a-light type="directional" position="1 2 -1" intensity="0.8"></a-light>
       <a-light type="ambient" intensity="0.5"></a-light>
 
-        <a-asset-item id="huevo" src="./assets/egg.glb"></a-asset-item>
+        <a-asset-item id="modelo-personalizado" src="./assets/egg.glb"></a-asset-item>
       </a-assets>
   <!-- Suelo virtual invisible para detectar dónde toca el usuario -->
       <a-plane 
@@ -76,7 +76,7 @@
       <!-- Tu modelo, ahora con ID, posición inicial en 0 y oculto por defecto -->
       <a-entity 
         id="mi-modelo"
-        gltf-model="#huevo" 
+        gltf-model="#modelo-personalizado" 
         position="0 0 0" 
         scale="1 1 1" 
         visible="false"
