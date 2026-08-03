@@ -5,13 +5,17 @@
     <title>Mi Primera Esfera con 8th Wall (SLAM)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     
-    <!-- 1. A-Frame -->
+    <!-- 1. 8th Wall Engine Binary (Incluye SLAM) cargado desde CDN -->
+    <!-- Cargamos xr.js desde el paquete @8thwall/engine-binary y pre-cargamos el chunk SLAM -->
+    <script async src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" crossorigin="anonymous" data-preload-chunks="slam"></script>
+    
+    <!-- 2. XR Extras (Componentes UI, permisos, manejo de errores) -->
+    <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
+
+    <!-- 3. A-Frame (versión compatible, 1.3.0 es comúnmente usada con 8th Wall) -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     
-    <!-- 2. XR Extras - Proporciona UI de carga, permisos de cámara y manejo de errores de 8th Wall -->
-    <script src="https://cdn.8thwall.com/web/xrextras/xrextras.js"></script>
-    
-      <style>
+    <style>
       /* Aseguramos que el canvas ocupe todo el espacio de la pantalla */
       body { 
         margin: 0; 
@@ -22,8 +26,7 @@
   <body>
     <!-- 
       El atributo 'xrweb' es la magia de 8th Wall que activa el SLAM (World Tracking).
-      Los componentes 'xrextras-*' añaden la pantalla de carga, solicitan permisos 
-      de cámara automáticamente y manejan errores comunes.
+      Ya NO es necesario un app-key.
     -->
     <a-scene
       xrextras-gesture-detector
@@ -45,12 +48,13 @@
         En SLAM (xrweb), 1 unidad = 1 metro en la vida real.
         Aquí la colocamos 1 metro arriba (y=1) y 3 metros hacia el fondo (z=-3) 
       -->
-      <a-sphere 
-        position="0 1 -3" 
-        radius="0.5" 
-        color="#EF2D5E" 
-        shadow>
-      </a-sphere>
+    
+    <a-assets>
+    <a-asset-item id="huevo" src="/assets/egg.glb"></a-asset-item>
+    </a-assets>
+
+        
+    <a-entity gltf-model="#huevo" animation-mixer position="0 1 -3"  shadow ></a-entity>
 
     </a-scene>
   </body>
