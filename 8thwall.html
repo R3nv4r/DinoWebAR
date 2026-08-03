@@ -1,34 +1,149 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Mi Primera Esfera en AR</title>
-    <meta name="description" content="Una escena sencilla con una esfera en Realidad Aumentada usando A-Frame y AR.js.">
-    <!-- Incluimos la librería de A-Frame (la versión 1.3.0 es la más recomendada para AR.js) -->
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <!-- Incluimos AR.js para añadir las capacidades de Realidad Aumentada -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-      /* Aseguramos que el body ocupe todo el espacio y quitamos márgenes */
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- El elemento <a-scene> adaptado para AR.js usando la cámara web -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      
-      <!-- Usamos el marcador predeterminado 'hiro'. Cuando la cámara lo vea, mostrará lo que hay dentro -->
-      <a-marker preset="hiro">
-        <!-- Redujimos un poco la esfera para que encaje mejor sobre el marcador -->
-        <a-sphere position="0 0.5 0" radius="0.5" color="#EF2D5E"></a-sphere>
-      </a-marker>
-      
-      <!-- La entidad cámara es obligatoria para procesar la realidad aumentada -->
-      <a-entity camera></a-entity>
 
-    </a-scene>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A-Frame: Tap to Place Ground</title>
+  <meta itemprop="name" content="A-Frame: Tap to Place Ground">
+  <meta name="twitter:title" content="A-Frame: Tap to Place Ground">
+  <meta property="og:title" content="A-Frame: Tap to Place Ground">
+  <meta property="og:site_name" content="A-Frame: Tap to Place Ground">
+  <meta name="description" content="This example allows the user to grow cacti 🌵  by tapping or clicking the ground. Showcases raycasting, spawning objects, and importing a 3D model.">
+  <meta itemprop="description" content="This example allows the user to grow cacti 🌵  by tapping or clicking the ground. Showcases raycasting, spawning objects, and importing a 3D model.">
+  <meta property="og:description" content="This example allows the user to grow cacti 🌵  by tapping or clicking the ground. Showcases raycasting, spawning objects, and importing a 3D model.">
+  <meta name="twitter:description" content="This example allows the user to grow cacti 🌵  by tapping or clicking the ground. Showcases raycasting, spawning objects, and importing a 3D model.">
+  <meta property="og:image" content="https://8thwall.org/aframe-world-effects/assets/preview.gif"/>
+
+  <script crossorigin="anonymous" src="./external/scripts/8frame-1.5.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@8thwall/landing-page@1/dist/landing-page.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js" crossorigin="anonymous" async="true" data-preload-chunks="slam"></script>
+</head>
+
+<body>
+<script>
+    // Component that places cacti where the ground is clicked
+
+export const tapPlaceComponent = {
+  schema: {
+    min: {default: 6},
+    max: {default: 10},
+  },
+  init() {
+    const ground = document.getElementById('ground')
+    this.prompt = document.getElementById('promptText')
+    
+    ground.addEventListener('click', (event) => {
+      // Dismiss the prompt text.
+      this.prompt.style.display = 'none'
+      
+      // Create new entity for the new object
+      const newElement = document.createElement('a-entity')
+
+      // The raycaster gives a location of the touch in the scene
+      const touchPoint = event.detail.intersection.point
+      newElement.setAttribute('position', touchPoint)
+
+      const randomYRotation = Math.random() * 360
+      newElement.setAttribute('rotation', `0 ${randomYRotation} 0`)
+
+      const randomScale = Math.floor(Math.random() * (Math.floor(this.data.max) - Math.ceil(this.data.min)) + Math.ceil(this.data.min))
+
+      newElement.setAttribute('visible', 'false')
+      newElement.setAttribute('scale', '0.0001 0.0001 0.0001')
+
+      newElement.setAttribute('shadow', {
+        receive: false,
+      })
+
+      newElement.setAttribute('gltf-model', '#cactusModel')
+      this.el.sceneEl.appendChild(newElement)
+
+      newElement.addEventListener('model-loaded', () => {
+        // Once the model is loaded, we are ready to show it popping in using an animation
+        newElement.setAttribute('visible', 'true')
+        newElement.setAttribute('animation', {
+          property: 'scale',
+          to: `${randomScale} ${randomScale} ${randomScale}`,
+          easing: 'easeOutElastic',
+          dur: 800,
+        })
+      })
+    })
+  },
+}
+</script>
+<!-- Copyright (c) 2022 8th Wall, Inc. -->
+<!-- body.html is optional; elements will be added to your html body after app.js is loaded. -->
+
+<div class="over">
+  <span id="promptText">Tap To Place Model</span>
+</div>
+
+<!-- Add the tap-place component to the scene so it has an effect -->
+<a-scene
+  tap-place
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement:true"
+  xrweb="
+    allowedDevices: any;
+    defaultEnvironmentFogIntensity: 0.5; 
+    defaultEnvironmentFloorTexture: #groundTex; 
+    defaultEnvironmentFloorColor: #FFF;
+    defaultEnvironmentSkyBottomColor: #B4C4CC; 
+    defaultEnvironmentSkyTopColor: #5ac8fa;
+    defaultEnvironmentSkyGradientStrength: 0.5;">
+
+  <!-- We can define assets here to be loaded when A-Frame initializes -->
+  <a-assets>
+    <img id="groundTex" src="assets/huevo.svg">
+    <a-asset-item id="cactusModel" src="assets/egg.glb"></a-asset-item>
+  </a-assets>
+
+  <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
+  <a-camera
+    id="camera"
+    position="0 8 8"
+    raycaster="objects: .cantap"
+    cursor="
+      fuse: false;
+      rayOrigin: mouse;">
+  </a-camera>
+
+  <a-entity
+    light="
+      type: directional;
+      intensity: 0.8;
+      castShadow: true;
+      shadowMapHeight:2048;
+      shadowMapWidth:2048;
+      shadowCameraTop: 40;
+      shadowCameraBottom: -40;
+      shadowCameraRight: 40;
+      shadowCameraLeft: -40;
+      target: #camera"
+    xrextras-attach="target: camera; offset: 8 15 4"
+    position="1 4.3 2.5"
+    shadow>
+  </a-entity>
+
+  <a-light type="ambient" intensity="0.5"></a-light>
+
+  <!-- Adding the cantap class allows the ground to be clicked -->
+  <a-box
+    id="ground"
+    class="cantap"
+    scale="1000 2 1000"
+    position="0 -0.99 0"
+    material="shader: shadow; transparent: true; opacity: 0.4"
+    shadow>
+  </a-box>
+</a-scene>
+
+</body>
+
 </html>
