@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>DinoWebAR - Experiencia Inmersiva</title>
+    <title>8th Wall - World Effect AR</title>
+
+    <!-- Utilizamos ImportMap para cargar Three.js de manera moderna como módulos -->
     <script type="importmap">
         {
             "imports": {
@@ -14,70 +15,222 @@
         }
     </script>
     
-    <!-- 1. Agregamos el script local del motor de 8th Wall -->
+    <!-- Script de licencia gratuita alojado localmente -->
     <script src="./external/xr/xr.js"></script>
+
+    <style>
+        /* Reseteo básico para que el canvas ocupe todo */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #111; /* Fondo oscuro por si tarda la cámara */
+        }
+
+        /* El canvas de 8th Wall debe ir al fondo */
+        #ar-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            color: white;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 80%;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #4CAF50;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        #start-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        #start-btn:active {
+            transform: scale(0.95);
+        }
+
+        #start-btn:disabled {
+            background-color: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
-    <!-- 2. Agregamos el Canvas de 8th Wall al fondo (detrás de la UI) -->
-    <canvas id="ar-canvas" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;"></canvas>
 
-    <!-- PANTALLA DE BIENVENIDA 
-    <div id="welcome-screen">
-       
-        <div class="welcome-logo">
-            <img src="assets/huevo_reduc.gif" alt="Huevo animado">
-        </div>
-        
-        <div class="texto">
-            <h1>DinoWebAR</h1>
-        <p>Para iniciar esta experiencia acepte el permiso a la camara, presiona el boton ¡INICIAR!. y disfruta de la realidad Aumentada.</p>
-        </div>
-        
-        <div class="leyenda">
-            <p>XDevLAb  |  Todos los derechos reservados</p>
-        </div>
-        <div id="ar-button-container"></div>
-    </div> -->
-        
-    <div id="ar-ui">
+    <!-- Canvas donde 8th Wall dibujará la cámara y el modelo 3D -->
+    <canvas id="ar-canvas"></canvas>
 
-        <!-- Mensaje flotante de captura -->
-        <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
-
-        <!-- Carrusel de Modelos -->
-        <div id="model-carousel-container">
-            <div class="carousel-header">
-                <h2>Modelos 3D</h2>
-                <button id="btn-close-carousel">&times;</button>
-            </div>
-            <div id="model-carousel">
-                
-            </div>
-        </div>
-
-        <!-- Barra inferior de acciones -->
-        <div id="bottom-bar">
-            <!-- Botón de Salir (X) -->
-        <button id="btn-exit-ar">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-            <!-- Botón de Reposicionar -->
-            <button class="icon-btn" id="btn-reposition">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-            </button>
-            
-            <!-- Botón de captura -->
-            <button id="btn-capture">
-                <div class="inner-circle"></div>
-            </button>
-            
-            <!-- Botón de Modelos -->
-            <button class="icon-btn" id="btn-models">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            </button>
+    <!-- Interfaz 2D superpuesta -->
+    <div id="ui-layer">
+        <div class="card">
+            <h1>Experiencia AR</h1>
+            <p>Apunta tu cámara hacia un espacio libre en el suelo.<br>Al iniciar, verás el objeto anclado al mundo real.</p>
+            <button id="start-btn">Iniciar Experiencia</button>
         </div>
     </div>
 
-    <script type="module" src="js/funcion.js"></script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // Variables globales para la animación
+        let modeloActual;
+        let mixerAnimacion;
+        const reloj = new THREE.Clock();
+
+        // 1. DEFINIMOS EL MÓDULO DE 8TH WALL
+        const creadorEscenaAR = () => {
+            return {
+                // Nombre obligatorio para registrar el módulo en XR8
+                name: 'world-effect-ar',
+
+                onStart: ({ canvas }) => {
+                    console.log("8th Wall iniciado. Configurando escena Three.js...");
+                    
+                    // Extraemos los objetos que 8th Wall ya creó y configuró por nosotros
+                    const { scene, camera, renderer } = XR8.Threejs.xrScene();
+
+                    // Iluminación básica
+                    const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.2);
+                    scene.add(luzAmbiente);
+
+                    const luzDireccional = new THREE.DirectionalLight(0xffffff, 2);
+                    luzDireccional.position.set(5, 10, 7);
+                    luzDireccional.castShadow = true;
+                    scene.add(luzDireccional);
+
+                    const loader = new GLTFLoader();
+                    
+                    // Cargamos el huevo.glb (Asegúrate de que la ruta exista en tu servidor local)
+                    loader.load(
+                        './assets/egg.glb',
+                        (gltf) => {
+                            modeloActual = gltf.scene;
+                            
+                            // Ajustar escala (depende de cómo se exportó tu modelo)
+                            modeloActual.scale.set(0.5, 0.5, 0.5);
+                            
+                            // Posicionamiento "World Effect" (SLAM)
+                            // 8th Wall coloca la cámara inicial en Y = 1.5 aprox.
+                            // Para simular el suelo (floor), bajamos el objeto en Y.
+                            // X=0 (centro), Y=0 (suelo de 8th wall), Z=-3 (3 metros adelante)
+                            modeloActual.position.set(0, 0, -3);
+                            
+                            scene.add(modeloActual);
+                            console.log("Modelo cargado y añadido al suelo (Z: -3m).");
+
+                            // Manejo de animaciones si el modelo las incluye
+                            if (gltf.animations && gltf.animations.length > 0) {
+                                mixerAnimacion = new THREE.AnimationMixer(modeloActual);
+                                const accion = mixerAnimacion.clipAction(gltf.animations[0]);
+                                accion.play();
+                            }
+                        },
+                        undefined,
+                        (error) => console.error("Error cargando el modelo:", error)
+                    );
+                },
+
+                onUpdate: () => {
+                    const delta = reloj.getDelta();
+                    
+                    // Rotación constante para darle vida si no tiene animaciones de hueso
+                    if (modeloActual) {
+                        modeloActual.rotation.y += 0.5 * delta;
+                    }
+
+                    // Actualizar el mixer de animaciones
+                    if (mixerAnimacion) {
+                        mixerAnimacion.update(delta);
+                    }
+                }
+            };
+        };
+
+        const arrancarXR = () => {
+            const canvas = document.getElementById('ar-canvas');
+            
+            // Registramos la tubería de ejecución de 8th Wall
+            XR8.addCameraPipelineModules([
+                XR8.GlTextureRenderer.pipelineModule(), // Dibuja la cámara
+                XR8.Threejs.pipelineModule(),           // Sincroniza matriz de proyección 3D
+                XR8.XrController.pipelineModule(),      // Habilita el tracking espacial (SLAM 6DoF)
+                creadorEscenaAR(),                      // Inyectamos nuestro modelo 3D
+            ]);
+
+            // Arrancamos el motor XR8
+            XR8.run({ canvas: canvas });
+        };
+
+        // Escuchador del botón principal
+        document.getElementById('start-btn').addEventListener('click', (e) => {
+            const btn = e.target;
+            btn.textContent = "Cargando Motor...";
+            btn.disabled = true;
+
+            // Desaparecer la interfaz con una animación
+            const uiLayer = document.getElementById('ui-layer');
+            uiLayer.style.opacity = '0';
+            setTimeout(() => {
+                uiLayer.style.display = 'none';
+            }, 500);
+
+            // Verificar si XR8 ya está en memoria y ejecutar
+            if (window.XR8) {
+                arrancarXR();
+            } else {
+                // Si aún no carga, esperamos el evento global
+                window.addEventListener('xrloaded', arrancarXR);
+            }
+        });
+    </script>
 </body>
 </html>
