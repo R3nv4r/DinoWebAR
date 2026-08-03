@@ -39,16 +39,22 @@
       <!-- La cámara. 8th Wall toma el control de su posición y rotación basándose en tu entorno -->
       <a-camera position="0 1.6 0"></a-camera>
       
-      <!-- Luces para que la esfera tenga volumen y no se vea plana -->
+      <!-- Luces para que el modelo tenga volumen -->
       <a-light type="directional" position="1 2 -1" intensity="0.8"></a-light>
       <a-light type="ambient" intensity="0.5"></a-light>
 
-    <a-sphere 
-        position="0 1 -3" 
-        radius="0.5" 
-        color="#EF2D5E" 
+      <a-assets>
+        <!-- Reemplaza el enlace por la URL o ruta local de tu propio archivo .glb -->
+        <!-- Como ejemplo, he puesto el modelo de un pato en 3D de prueba -->
+        <a-asset-item id="modelo-personalizado" src="/assets/egg.glb"></a-asset-item>
+      </a-assets>
+
+      <a-entity 
+        gltf-model="#modelo-personalizado" 
+        position="0 0 -3" 
+        scale="1 1 1" 
         shadow>
-      </a-sphere>
+      </a-entity>
     </a-scene>
   </body>
 </html>
