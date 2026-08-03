@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 /**
  * Este módulo contiene toda la lógica de Three.js.
  * 8th Wall usa este patrón en lugar de renderer.setAnimationLoop()
@@ -25,8 +28,8 @@ const dinoWebARPipeline = () => {
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
-      // Inicializamos el cargador de modelos de Three.js
-      const loader = new THREE.GLTFLoader();
+      // Inicializamos el cargador de modelos de Three.js (modificado para ES Modules)
+      const loader = new GLTFLoader();
 
       // Asegúrate de que la ruta coincida con la ubicación de tu archivo en el servidor
       loader.load(
@@ -116,14 +119,58 @@ const initXR8 = () => {
     canvas: canvas,
     allowedDevices: XR8.XrConfig.device().ANY, // Permite móviles y pruebas en escritorio
   });
+
+  // Ocultamos la pantalla de bienvenida y mostramos la Interfaz AR
+  const welcomeScreen = document.getElementById('welcome-screen');
+  const arUI = document.getElementById('ar-ui');
+  if (welcomeScreen) welcomeScreen.style.display = 'none';
+  if (arUI) arUI.style.display = 'block'; // O 'flex' dependiendo de tu CSS
 };
 
-window.onload = () => {
-  // Verificamos si el objeto XR8 ya está disponible globalmente
-  if (window.XR8) {
-    initXR8();
+// Función para crear y configurar el botón de inicio de forma segura
+const setupStartButton = () => {
+  const btnContainer = document.getElementById('ar-button-container');
+  
+  if (btnContainer) {
+    btnContainer.innerHTML = ''; // Limpiamos el contenedor por si acaso
+    
+    const btnIniciar = document.createElement('button');
+    btnIniciar.textContent = '¡INICIAR!';
+    
+    // Aplicamos estilos directamente para garantizar que sea visible
+    btnIniciar.style.padding = '15px 40px';
+    btnIniciar.style.fontSize = '20px';
+    btnIniciar.style.fontWeight = 'bold';
+    btnIniciar.style.backgroundColor = '#ff4757'; // Rojo llamativo
+    btnIniciar.style.color = '#ffffff';
+    btnIniciar.style.border = 'none';
+    btnIniciar.style.borderRadius = '30px';
+    btnIniciar.style.cursor = 'pointer';
+    btnIniciar.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    btnIniciar.style.marginTop = '20px';
+    
+    btnIniciar.addEventListener('click', () => {
+      // Feedback visual para el usuario mientras carga la cámara
+      btnIniciar.textContent = 'Cargando...';
+      btnIniciar.disabled = true;
+      btnIniciar.style.backgroundColor = '#cccccc';
+      
+      if (window.XR8) {
+        initXR8();
+      } else {
+        window.addEventListener('xrloaded', initXR8);
+      }
+    });
+    
+    btnContainer.appendChild(btnIniciar);
   } else {
-    // Si no, esperamos al evento que dispara el script de xr.js al terminar de cargar
-    window.addEventListener('xrloaded', initXR8);
+    console.warn('No se encontró el contenedor #ar-button-container en el HTML.');
   }
 };
+
+// Como usamos type="module", verificamos el estado del DOM antes de inyectar el botón
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupStartButton);
+} else {
+  setupStartButton();
+}
