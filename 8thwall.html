@@ -10,7 +10,26 @@
     
     <!-- 2. XR Extras - Proporciona UI de carga, permisos de cámara y manejo de errores de 8th Wall -->
     <script src="https://cdn.8thwall.com/web/xrextras/xrextras.js"></script>
-    
+    <script>
+      AFRAME.registerComponent('tap-to-place', {
+        init: function() {
+          const ground = document.getElementById('ground');
+          const modelo = document.getElementById('mi-modelo');
+          
+          // Cuando detectamos un toque en el suelo virtual
+          ground.addEventListener('click', (event) => {
+            // Obtenemos las coordenadas 3D del punto exacto tocado
+            const point = event.detail.intersection.point;
+            
+            // Movemos el modelo a ese punto
+            modelo.setAttribute('position', point);
+            
+            // Hacemos el modelo visible (ya que empieza oculto)
+            modelo.setAttribute('visible', 'true');
+          });
+        }
+      });
+    </script>
       <style>
       /* Aseguramos que el canvas ocupe todo el espacio de la pantalla */
       body { 
@@ -19,19 +38,20 @@
       }
     </style>
   </head>
+
   <body>
-    <!-- 
-      El atributo 'xrweb' es la magia de 8th Wall que activa el SLAM (World Tracking).
-      Los componentes 'xrextras-*' añaden la pantalla de carga, solicitan permisos 
-      de cámara automáticamente y manejan errores comunes.
-    -->
+
+    <!-- Añadimos 'tap-to-place' a la escena y configuramos el raycaster -->
     <a-scene
+      tap-to-place
       xrextras-gesture-detector
       xrextras-almost-there
       xrextras-loading
       xrextras-runtime-error
       renderer="colorManagement: true"
-      xrweb>
+      xrweb="data-preload-chunks: slam"
+      cursor="rayOrigin: mouse; fuse: false"
+      raycaster="objects: .cantap">
       
       <!-- La cámara. 8th Wall toma el control de su posición y rotación basándose en tu entorno -->
       <a-camera position="0 1.6 0"></a-camera>
@@ -40,15 +60,26 @@
       <a-light type="directional" position="1 2 -1" intensity="0.8"></a-light>
       <a-light type="ambient" intensity="0.5"></a-light>
 
-       <!-- Reemplaza el enlace por la URL o ruta local de tu propio archivo .glb -->
-        <!-- Como ejemplo, he puesto el modelo de un pato en 3D de prueba -->
-        <a-asset-item id="modelo-personalizado" src="./assets/egg.glb"></a-asset-item>
+        <a-asset-item id="huevo" src="./assets/egg.glb"></a-asset-item>
       </a-assets>
+  <!-- Suelo virtual invisible para detectar dónde toca el usuario -->
+      <a-plane 
+        id="ground" 
+        class="cantap" 
+        position="0 0 0" 
+        rotation="-90 0 0" 
+        width="1000" 
+        height="1000" 
+        material="transparent: true; opacity: 0;">
+      </a-plane>
 
+      <!-- Tu modelo, ahora con ID, posición inicial en 0 y oculto por defecto -->
       <a-entity 
-        gltf-model="#modelo-personalizado" 
-        position="0 0 -3" 
+        id="mi-modelo"
+        gltf-model="#huevo" 
+        position="0 0 0" 
         scale="1 1 1" 
+        visible="false"
         shadow>
       </a-entity>
     </a-scene>
