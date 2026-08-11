@@ -1,176 +1,218 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { ARButton } from 'three/addons/webxr/ARButton.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-/**
- * Este módulo contiene toda la lógica de Three.js.
- * 8th Wall usa este patrón en lugar de renderer.setAnimationLoop()
- */
-const dinoWebARPipeline = () => {
-  let model;
-  let mixer;
-  const clock = new THREE.Clock();
+        // 1. DECLARACIÓN DE VARIABLES GLOBALES
+        let camera, scene, renderer;
+        let modelo3D, mixer; 
+        const clock = new THREE.Clock(); 
+        const loader = new GLTFLoader();
 
-  return {
-    // El nombre del módulo (requerido por XR8)
-    name: 'dinowebar-pipeline',
+        // 2. OBTENER REFERENCIAS DEL DOM
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const arUI = document.getElementById('ar-ui');
+        const btnExitAR = document.getElementById('btn-exit-ar');
+        const btnCapture = document.getElementById('btn-capture');
+        const bottomBar = document.getElementById('bottom-bar');
+        const toastMessage = document.getElementById('toast-message');
+        const btnModels = document.getElementById('btn-models');
+        const carouselContainer = document.getElementById('model-carousel-container');
+        const btnCloseCarousel = document.getElementById('btn-close-carousel');
+        const carouselDiv = document.getElementById('model-carousel');
+        const btnStart = document.getElementById('btn-start');
 
-    // onStart se llama una vez cuando 8th Wall ha inicializado la cámara
-    onStart: ({ canvas }) => {
-      // Obtenemos las instancias creadas automáticamente por 8th Wall
-      const { scene, camera, renderer } = XR8.Threejs.xrScene();
-
-      // Añadimos iluminación a la escena
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-      scene.add(ambientLight);
-
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0);
-      directionalLight.position.set(5, 10, 5);
-      directionalLight.castShadow = true;
-      scene.add(directionalLight);
-
-      // Inicializamos el cargador de modelos de Three.js (modificado para ES Modules)
-      const loader = new GLTFLoader();
-
-      // Asegúrate de que la ruta coincida con la ubicación de tu archivo en el servidor
-      loader.load(
-        './assets/egg.glb',
-        (gltf) => {
-          model = gltf.scene;
-          
-          // Ajustamos la escala del modelo (modifica estos valores según necesites)
-          model.scale.set(0.5, 0.5, 0.5);
-          
-          // Posicionamos el modelo 2 metros frente a la cámara al iniciar
-          model.position.set(0, 0, -2);
-          
-          // Habilitamos sombras si es necesario
-          model.traverse((node) => {
-            if (node.isMesh) {
-              node.castShadow = true;
-              node.receiveShadow = true;
+        // 3. CONFIGURACIÓN DE MODELOS
+        const modelosDisponibles = [
+            { 
+                id: 'huevo', 
+                url: 'assets/egg.glb', 
+                scale: 0.1, 
+                positionY: -0.2,
+                svg: `<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="layer1"><path
+       style="display:inline;fill:#000000;fill-opacity:1"
+       d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z"
+       id="path2" /><path
+       style="display:inline;fill:#12d227;fill-opacity:1;stroke-width:0.935016"
+       d="M 102.59514,250.77843 C 41.95251,246.63358 15.362288,180.51005 44.209011,105.58601 67.302434,45.605138 107.61378,24.976898 140.88436,56.11503 c 34.24935,32.05417 52.14841,96.85117 39.00385,141.19919 -10.25864,34.61125 -41.09143,55.93854 -77.29307,53.46421 z"
+       id="path2-2" /><path
+       style="display:inline;fill:#becc88;fill-opacity:1"
+       d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z m 17.2612,-1.2287 C 180.28476,246.81904 204.56514,178.02739 174.98214,98.788845 157.83722,52.8659 129.60749,26.56797 101.91918,30.725691 55.365696,37.716234 15.56377,135.92752 33.820245,198.75987 c 11.460291,39.44229 46.785806,63.01023 85.696765,57.17388 z m -17.66541,-2.87461 c -25.275443,-2.19486 -49.651379,-18.88668 -58.759296,-40.23638 -1.329127,-3.11559 -1.315743,-3.42679 0.109994,-2.5575 6.456893,3.93685 8.235192,-9.3908 4.283105,-32.10016 -2.578687,-14.81758 -9.132997,-23.98 -13.32361,-18.62539 l -0.869033,1.11042 -0.254372,-1.35592 c -1.458386,-7.77387 3.672295,-35.64667 9.904667,-53.80782 21.00001,-61.19408 58.021415,-87.121113 90.305765,-63.243419 34.80154,25.739421 58.66352,97.744499 48.67559,146.881779 -8.38331,41.24309 -41.04674,67.32332 -80.07281,63.93439 z m 32.22846,-6.82407 c 21.424,-5.9369 33.75417,-33.84102 14.86737,-33.64602 l -3.35138,0.0346 -2.97845,1.1121 c -5.78482,2.15998 -12.01465,7.33036 -15.69187,13.02332 -0.91051,1.40963 -2.03433,2.81119 -2.49737,3.11459 -2.19449,1.43788 -3.84201,11.41758 -2.35413,14.2599 1.45307,2.77581 6.42926,3.64684 12.00583,2.1015 z m -24.017,-14.48611 c 2.56697,-1.25193 3.60974,-2.49219 2.96429,-3.52572 -0.22881,-0.36639 -0.41603,-1.51762 -0.41603,-2.5583 0,-6.23342 -9.87445,-9.08894 -14.709626,-4.25376 -0.530712,0.53071 -1.446592,1.06274 -2.035289,1.18229 l -1.070358,0.21737 -0.105914,1.81849 c -0.378388,6.49677 8.355937,10.54188 15.372927,7.11963 z M 148.85368,82.300058 c 4.55573,-2.095815 3.48221,-11.224359 -2.18914,-18.615014 -6.54138,-8.524431 -14.97986,-8.66772 -16.45313,-0.279382 -1.838,10.465011 10.27624,22.743092 18.64227,18.894396 z M 95.363729,63.145757 C 105.22108,61.276348 111.03602,51.00232 105.21381,45.742301 99.392468,40.483071 85.725683,48.143831 85.166747,56.97945 l -0.133899,2.116667 0.825854,1.215648 c 1.799419,2.648729 5.174963,3.655171 9.505027,2.833992 z"
+       id="path1" /></g></svg>` 
+            },
+            { 
+                id: 'pato_prueba', 
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
+                scale: 0.5, 
+                positionY: -0.2,
+                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
             }
-          });
+        ];
 
-          scene.add(model);
+        // 4. INICIALIZACIÓN
+        init();
+        animate();
 
-          // Si el modelo tiene animaciones, preparamos el AnimationMixer
-          if (gltf.animations && gltf.animations.length > 0) {
-            mixer = new THREE.AnimationMixer(model);
-            const action = mixer.clipAction(gltf.animations[0]);
-            action.play();
-          }
-          
-          console.log('Modelo cargado exitosamente en el entorno AR.');
-        },
-        // Progreso de carga
-        (xhr) => {
-          console.log((xhr.loaded / xhr.total) * 100 + '% cargado');
-        },
-        // Manejo de errores
-        (error) => {
-          console.error('Ocurrió un error al cargar el modelo 3D:', error);
+        function init() {
+            scene = new THREE.Scene();
+            scene.visible = false; // Ocultar todo el mundo 3D hasta iniciar AR
+
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            // Iluminación
+            const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
+            scene.add(luzAmbiental);
+            
+            const luzDireccional = new THREE.DirectionalLight(0xffffff, 2);
+            luzDireccional.position.set(1, 2, 1);
+            scene.add(luzDireccional);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
+            renderer.setPixelRatio(1); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0); 
+            renderer.xr.enabled = true;
+            document.body.appendChild(renderer.domElement);
+            
+
+            //boton de inicio para ocultar pantalla de bienvenida
+            btnStart.addEventListener('click', () => {
+                welcomeScreen.classList.add('hidden');
+            });
+            // Llenar el carrusel con botones antes de cargar el primer modelo
+            construirCarrusel();
+
+            // Cargar modelo inicial
+            cargarModelo(modelosDisponibles[0]);
+           
+            window.addEventListener('resize', onWindowResize, false);
         }
-      );
-    },
 
-    // onUpdate se llama en cada frame, reemplazando a requestAnimationFrame
-    onUpdate: () => {
-      const delta = clock.getDelta();
+        function cargarModelo(modeloConfig) {
+            // Limpiar anterior
+            if (modelo3D) {
+                scene.remove(modelo3D);
+            }
+            if (mixer) {
+                mixer.stopAllAction();
+                mixer = null;
+            }
 
-      // Si el modelo está cargado, aplicamos una rotación constante
-      if (model) {
-        model.rotation.y += 0.01;
-      }
+            console.log("Cargando: ", modeloConfig.url);
 
-      // Si hay animaciones activas, las actualizamos
-      if (mixer) {
-        mixer.update(delta);
-      }
-    },
-  };
-};
+            // Cargar nuevo
+            loader.load(modeloConfig.url, function (gltf) {
+                modelo3D = gltf.scene;
+                modelo3D.scale.set(modeloConfig.scale, modeloConfig.scale, modeloConfig.scale); 
+                modelo3D.position.set(0, modeloConfig.positionY, -1); 
+                scene.add(modelo3D);
+                
+                // Animaciones
+                if (gltf.animations && gltf.animations.length) {
+                    mixer = new THREE.AnimationMixer(modelo3D);
+                    gltf.animations.forEach((clip) => {
+                        mixer.clipAction(clip).play();
+                    });
+                }
+            }, undefined, function (error) {
+                console.error("Error al cargar el modelo:", error);
+                const textoOriginal = toastMessage.innerText;
+                toastMessage.innerText = "Error cargando modelo";
+                toastMessage.style.opacity = '1';
+                setTimeout(() => { 
+                    toastMessage.style.opacity = '0'; 
+                    setTimeout(() => { toastMessage.innerText = textoOriginal; }, 300);
+                }, 3000);
+            });
+        }
 
-const initXR8 = () => {
-  // Asegúrate de tener un <canvas id="ar-canvas"></canvas> en tu index.html
-  const canvas = document.getElementById('ar-canvas');
-  
-  if (!canvas) {
-    console.error('No se encontró el canvas. Verifica que el ID en index.html sea "ar-canvas".');
-    return;
-  }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
-  // Registramos los módulos en la tubería de 8th Wall
-  XR8.addCameraPipelineModules([
-    // Dibuja el feed de video de la cámara en el canvas
-    XR8.GlTextureRenderer.pipelineModule(), 
-    
-    // Conecta la cámara de 8th Wall con la de Three.js
-    XR8.Threejs.pipelineModule(),           
-    
-    // Habilita el tracking espacial de 6 grados de libertad (SLAM)
-    XR8.XrController.pipelineModule(),      
-    
-    // Inyectamos nuestro módulo personalizado con la lógica del Dinosaurio/Huevo
-    dinoWebARPipeline(),                    
-  ]);
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
 
-  // Configuramos e iniciamos la experiencia
-  XR8.run({ 
-    canvas: canvas,
-    allowedDevices: XR8.XrConfig.device().ANY, // Permite móviles y pruebas en escritorio
-  });
+        function render() {
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
+            renderer.render(scene, camera);
+        }
 
-  // Ocultamos la pantalla de bienvenida y mostramos la Interfaz AR
-  const welcomeScreen = document.getElementById('welcome-screen');
-  const arUI = document.getElementById('ar-ui');
-  if (welcomeScreen) welcomeScreen.style.display = 'none';
-  if (arUI) arUI.style.display = 'block'; // O 'flex' dependiendo de tu CSS
-};
+        // 5. EVENTOS DE LOS BOTONES
+        let toastTimeout;
+        let uiTimeout;
 
-// Función para crear y configurar el botón de inicio de forma segura
-const setupStartButton = () => {
-  const btnContainer = document.getElementById('ar-button-container');
-  
-  if (btnContainer) {
-    btnContainer.innerHTML = ''; // Limpiamos el contenedor por si acaso
-    
-    const btnIniciar = document.createElement('button');
-    btnIniciar.textContent = '¡INICIAR!';
-    
-    // Aplicamos estilos directamente para garantizar que sea visible
-    btnIniciar.style.padding = '15px 40px';
-    btnIniciar.style.fontSize = '20px';
-    btnIniciar.style.fontWeight = 'bold';
-    btnIniciar.style.backgroundColor = '#ff4757'; // Rojo llamativo
-    btnIniciar.style.color = '#ffffff';
-    btnIniciar.style.border = 'none';
-    btnIniciar.style.borderRadius = '30px';
-    btnIniciar.style.cursor = 'pointer';
-    btnIniciar.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
-    btnIniciar.style.marginTop = '20px';
-    
-    btnIniciar.addEventListener('click', () => {
-      // Feedback visual para el usuario mientras carga la cámara
-      btnIniciar.textContent = 'Cargando...';
-      btnIniciar.disabled = true;
-      btnIniciar.style.backgroundColor = '#cccccc';
-      
-      if (window.XR8) {
-        initXR8();
-      } else {
-        window.addEventListener('xrloaded', initXR8);
-      }
-    });
-    
-    btnContainer.appendChild(btnIniciar);
-  } else {
-    console.warn('No se encontró el contenedor #ar-button-container en el HTML.');
-  }
-};
+        // Botón Salir de AR (X)
+        btnExitAR.addEventListener('click', () => {
+            const session = renderer.xr.getSession();
+            if (session) {
+                session.end();
+            }
+        });
+        
+        // Botón Capturar (Limpiar pantalla)
+        btnCapture.addEventListener('click', () => {
+            bottomBar.classList.add('hide-for-capture');
+            carouselContainer.classList.add('hide-for-capture');
+            btnExitAR.classList.add('hide-for-capture');
+            carouselContainer.classList.remove('show-carousel'); // Asegurar cierre del carrusel
+            
+            
+            toastMessage.style.opacity = '1';
+            clearTimeout(toastTimeout);
+            clearTimeout(uiTimeout);
 
-// Como usamos type="module", verificamos el estado del DOM antes de inyectar el botón
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupStartButton);
-} else {
-  setupStartButton();
-}
+            toastTimeout = setTimeout(() => {
+                toastMessage.style.opacity = '0';
+            }, 2500);
+
+            uiTimeout = setTimeout(() => {
+                bottomBar.classList.remove('hide-for-capture');
+                carouselContainer.classList.remove('hide-for-capture');
+                 btnExitAR.classList.remove('hide-for-capture');
+            }, 8000);
+        });
+
+        // Botón Abrir Carrusel
+        btnModels.addEventListener('click', () => {
+            carouselContainer.classList.toggle('show-carousel');
+        });
+
+        // Botón Cerrar Carrusel
+        btnCloseCarousel.addEventListener('click', () => {
+            carouselContainer.classList.remove('show-carousel');
+        });
+
+        // Generar botones dentro del carrusel
+        function construirCarrusel() {
+            carouselDiv.innerHTML = ''; 
+            modelosDisponibles.forEach((modelo, index) => {
+                const btnItem = document.createElement('div');
+                btnItem.className = 'model-option';
+                if (index === 0) btnItem.classList.add('active');
+                
+                btnItem.innerHTML = modelo.svg;
+
+                btnItem.addEventListener('click', () => {
+                    document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
+                    btnItem.classList.add('active');
+                    cargarModelo(modelo);
+                });
+
+                carouselDiv.appendChild(btnItem);
+            });
+        }

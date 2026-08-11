@@ -1,0 +1,142 @@
+  /* Aseguramos que el canvas ocupe todo el espacio de la pantalla */
+      body { 
+        margin: 0; 
+        overflow: hidden; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      /* ESTILOS DE LA PANTALLA DE BIENVENIDA */
+      #welcome-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+            width: 100%;
+            height: 100%;
+            
+            background: linear-gradient(135deg, #0cc42a 0%, #1b5700 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 5; 
+            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+      }
+      #welcome-screen.hidden {
+        opacity: 0;
+        pointer-events: none; /* Permite clickear la escena de fondo cuando está oculto */
+      }
+      .welcome-logo{
+        width: 140px;
+            height: 140px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+      }
+      .welcome-logo img{
+            width:160%;
+        }
+      .texto h1 { 
+            margin: 0 0 10px 0;
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px; }
+      .texto p { 
+            margin: 0 0 10px 0; 
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 500px;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+      .leyenda { 
+            font-size: 14px;
+            color: #8bf06c; 
+            margin: 0; 
+            top: 0px; }
+      
+      /* ESTILOS DE BOTONES */
+      #btn-exit-ar {
+            width: 30px;
+            height: 40px;
+            top: 0px;
+            right: 0px;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 20;
+        }
+      
+      #btn-start {
+        position: static !important; 
+            transform: none !important; 
+            width: auto !important; 
+            left: auto !important;
+            bottom: auto !important;
+            opacity: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background-color: #ff8c00 !important; 
+            color: white !important;
+            border-radius: 30px !important; 
+            border: 2px solid rgba(255, 255, 255, 0.8) !important; 
+            font-weight: bold !important;
+            padding: 16px 32px !important; 
+            font-size: 16px !important; 
+            line-height: 1 !important; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+            letter-spacing: 1px !important;
+            white-space: nowrap !important; 
+      }
+
+      /* ESTILOS DE LA INTERFAZ AR */
+      #ar-ui {
+        position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex; 
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+      }
+      #ar-ui.active {
+        opacity: 1;
+            visibility: visible;
+      }
+      
+      #bottom-bar {
+        display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+            pointer-events: auto;
+            padding-bottom: 50px;
+            transition: opacity 0.3s ease;
+      }
+      /* Reactivar los clicks solo en los botones, no en la barra entera */
+      #bottom-bar button {
+        pointer-events: auto;
+      }
