@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>DinoWebAR - Experiencia Inmersiva</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+            }
+        }
+    </script>
+    
+</head>
+<body>
+    <!-- PANTALLA DE BIENVENIDA -->
+        
+    <div id="welcome-screen">
+       
+        <div class="welcome-logo">
+            <img src="assets/huevo_reduc.gif" alt="Huevo animado">
+        </div>
+        
+        <div class="texto">
+            <h1>DinoWebAR</h1>
+        <p>Para iniciar esta experiencia acepte el permiso a la camara, presiona el boton ¡INICIAR!. y disfruta de la realidad Aumentada.</p>
+        </div>
+        
+        <div class="leyenda">
+            <p>XDevLAb  |  Todos los derechos reservados</p>
+        </div>
+        <div id="ar-button-container"></div>
+    </div>
+    <div id="ar-ui">
+
+        <!-- Mensaje flotante de captura -->
+        <div id="toast-message">¡Pantalla limpia! Usa los botones de tu móvil para tomar captura.</div>
+
+        <!-- Carrusel de Modelos -->
+        <div id="model-carousel-container">
+            <div class="carousel-header">
+                <h2>Modelos 3D</h2>
+                <button id="btn-close-carousel">&times;</button>
+            </div>
+            <div id="model-carousel">
+                
+            </div>
+        </div>
+
+        <!-- Barra inferior de acciones -->
+        <div id="bottom-bar">
+            <!-- Botón de Salir (X) -->
+        <button id="btn-exit-ar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+            <!-- Botón de Reposicionar -->
+            <button class="icon-btn" id="btn-reposition">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            </button>
+            
+            <!-- Botón de captura -->
+            <button id="btn-capture">
+                <div class="inner-circle"></div>
+            </button>
+            
+            <!-- Botón de Modelos -->
+            <button class="icon-btn" id="btn-models">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+<p>Haga clic en el botón para iniciar la captura de su pantalla.</p>
+<button id="startBtn">Iniciar captura</button>
+<video id="videoElement" autoplay playsinline></video>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const videoElement = document.getElementById('videoElement');
+
+  startBtn.addEventListener('click', async () => {
+    try {
+      // Solicita permiso para capturar la pantalla
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      videoElement.srcObject = stream;
+    } catch (err) {
+      console.error("Error al capturar la pantalla: " + err);
+    }
+  });
+</script>
+    <script type="module" src="js/camara.js"></script>
+</body>
+</html>
