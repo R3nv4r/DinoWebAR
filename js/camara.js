@@ -1,52 +1,43 @@
-import * as THREE from 'three';
-        import { ARButton } from 'three/addons/webxr/ARButton.js';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-        // 1. DECLARACIÓN DE VARIABLES GLOBALES
-        let camera, scene, renderer;
-        let modelo3D, mixer; 
-        const clock = new THREE.Clock(); 
-        const loader = new GLTFLoader();
-
-        // 2. OBTENER REFERENCIAS DEL DOM
+      AFRAME.registerComponent('tap-to-place', {
+        init: function() {
+          const ground = document.getElementById('ground');
+          const modelo = document.getElementById('mi-modelo');
+          
+          // Cuando detectamos un toque en el suelo virtual
+          ground.addEventListener('click', (event) => {
+            // Obtenemos las coordenadas 3D del punto exacto tocado
+            const point = event.detail.intersection.point;
+            
+            // Movemos el modelo a ese punto
+            modelo.setAttribute('position', point);
+            
+            // Hacemos el modelo visible (ya que empieza oculto)
+            modelo.setAttribute('visible', 'true');
+          });
+        
+        }
+      });
+     document.addEventListener('DOMContentLoaded', () => {
         const welcomeScreen = document.getElementById('welcome-screen');
+        const btnStart = document.getElementById('btn-start');
         const arUI = document.getElementById('ar-ui');
         const btnExitAR = document.getElementById('btn-exit-ar');
+        
+        // Elementos de la interfaz de usuario
         const btnCapture = document.getElementById('btn-capture');
-        const bottomBar = document.getElementById('bottom-bar');
-        const toastMessage = document.getElementById('toast-message');
         const btnModels = document.getElementById('btn-models');
         const carouselContainer = document.getElementById('model-carousel-container');
         const btnCloseCarousel = document.getElementById('btn-close-carousel');
         const carouselDiv = document.getElementById('model-carousel');
-
-        // 3. CONFIGURACIÓN DE MODELOS
+        const modeloAFrame = document.getElementById('mi-modelo');
+        
         const modelosDisponibles = [
             { 
                 id: 'huevo', 
-                url: 'assets/egg.glb', 
+                url: 'assets/modelos/egg.glb', 
                 scale: 0.1, 
                 positionY: -0.2,
-                svg: `<svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
-   version="1.1"
-   id="svg1"
-   xml:space="preserve"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
-     id="defs1" /><g
-     id="layer1"><path
-       style="display:inline;fill:#000000;fill-opacity:1"
-       d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z"
-       id="path2" /><path
-       style="display:inline;fill:#12d227;fill-opacity:1;stroke-width:0.935016"
-       d="M 102.59514,250.77843 C 41.95251,246.63358 15.362288,180.51005 44.209011,105.58601 67.302434,45.605138 107.61378,24.976898 140.88436,56.11503 c 34.24935,32.05417 52.14841,96.85117 39.00385,141.19919 -10.25864,34.61125 -41.09143,55.93854 -77.29307,53.46421 z"
-       id="path2-2" /><path
-       style="display:inline;fill:#becc88;fill-opacity:1"
-       d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z m 17.2612,-1.2287 C 180.28476,246.81904 204.56514,178.02739 174.98214,98.788845 157.83722,52.8659 129.60749,26.56797 101.91918,30.725691 55.365696,37.716234 15.56377,135.92752 33.820245,198.75987 c 11.460291,39.44229 46.785806,63.01023 85.696765,57.17388 z m -17.66541,-2.87461 c -25.275443,-2.19486 -49.651379,-18.88668 -58.759296,-40.23638 -1.329127,-3.11559 -1.315743,-3.42679 0.109994,-2.5575 6.456893,3.93685 8.235192,-9.3908 4.283105,-32.10016 -2.578687,-14.81758 -9.132997,-23.98 -13.32361,-18.62539 l -0.869033,1.11042 -0.254372,-1.35592 c -1.458386,-7.77387 3.672295,-35.64667 9.904667,-53.80782 21.00001,-61.19408 58.021415,-87.121113 90.305765,-63.243419 34.80154,25.739421 58.66352,97.744499 48.67559,146.881779 -8.38331,41.24309 -41.04674,67.32332 -80.07281,63.93439 z m 32.22846,-6.82407 c 21.424,-5.9369 33.75417,-33.84102 14.86737,-33.64602 l -3.35138,0.0346 -2.97845,1.1121 c -5.78482,2.15998 -12.01465,7.33036 -15.69187,13.02332 -0.91051,1.40963 -2.03433,2.81119 -2.49737,3.11459 -2.19449,1.43788 -3.84201,11.41758 -2.35413,14.2599 1.45307,2.77581 6.42926,3.64684 12.00583,2.1015 z m -24.017,-14.48611 c 2.56697,-1.25193 3.60974,-2.49219 2.96429,-3.52572 -0.22881,-0.36639 -0.41603,-1.51762 -0.41603,-2.5583 0,-6.23342 -9.87445,-9.08894 -14.709626,-4.25376 -0.530712,0.53071 -1.446592,1.06274 -2.035289,1.18229 l -1.070358,0.21737 -0.105914,1.81849 c -0.378388,6.49677 8.355937,10.54188 15.372927,7.11963 z M 148.85368,82.300058 c 4.55573,-2.095815 3.48221,-11.224359 -2.18914,-18.615014 -6.54138,-8.524431 -14.97986,-8.66772 -16.45313,-0.279382 -1.838,10.465011 10.27624,22.743092 18.64227,18.894396 z M 95.363729,63.145757 C 105.22108,61.276348 111.03602,51.00232 105.21381,45.742301 99.392468,40.483071 85.725683,48.143831 85.166747,56.97945 l -0.133899,2.116667 0.825854,1.215648 c 1.799419,2.648729 5.174963,3.655171 9.505027,2.833992 z"
-       id="path1" /></g></svg>` 
+                svg: 'assets/miniatura/layer1.svg'
             },
             { 
                 id: 'pato_prueba', 
@@ -56,165 +47,26 @@ import * as THREE from 'three';
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
             }
         ];
-
-        // 4. INICIALIZACIÓN
-        init();
-        animate();
-
-        function init() {
-            scene = new THREE.Scene();
-            scene.visible = false; // Ocultar todo el mundo 3D hasta iniciar AR
-
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-
-            // Iluminación
-            const luzAmbiental = new THREE.AmbientLight(0xffffff, 1); 
-            scene.add(luzAmbiental);
-            
-            const luzDireccional = new THREE.DirectionalLight(0xffffff, 2);
-            luzDireccional.position.set(1, 2, 1);
-            scene.add(luzDireccional);
-
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); 
-            renderer.setPixelRatio(1); 
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 0); 
-            renderer.xr.enabled = true;
-            document.body.appendChild(renderer.domElement);
-            
-            // Botón AR con DOM Overlay
-            const arOptions = {
-                optionalFeatures: ['dom-overlay'],
-                domOverlay: { root: document.getElementById('ar-ui') }
-            };
-            
-            // CLAVE: Inyectar el botón en el contenedor, NO en el body
-            document.getElementById('ar-button-container').appendChild(ARButton.createButton(renderer, arOptions));
-
-            // Gestión de visibilidad al entrar y salir de AR
-            renderer.xr.addEventListener('sessionstart', () => {
-                arUI.classList.add('ar-active'); // Mostrar interfaz
-                scene.visible = true; // Mostrar el modelo 3D
-                welcomeScreen.classList.add('hidden'); // Desvanece la pantalla de bienvenida
-            });
-
-            renderer.xr.addEventListener('sessionend', () => {
-                arUI.classList.remove('ar-active'); // Ocultar interfaz
-                carouselContainer.classList.remove('show-carousel'); // Asegurar que el carrusel se cierre
-                scene.visible = false; // Ocultar el modelo 3D
-                welcomeScreen.classList.remove('hidden'); // Vuelve a mostrar la pantalla de bienvenida
-            });
-
-            // Llenar el carrusel con botones antes de cargar el primer modelo
-            construirCarrusel();
-
-            // Cargar modelo inicial
-            cargarModelo(modelosDisponibles[0]);
-           
-            window.addEventListener('resize', onWindowResize, false);
+        
+        // 0. Función para cambiar el modelo en 3D dinámicamente
+        function cargarModelo(modelo) {
+            modeloAFrame.setAttribute('gltf-model', modelo.url);
+            modeloAFrame.setAttribute('scale', `${modelo.scale} ${modelo.scale} ${modelo.scale}`);
+            // El pato y otros modelos podrían estar descentrados en Y, ajustamos un poco
+            let currentPos = modeloAFrame.getAttribute('position') || {x: 0, y: 0, z: 0};
+            modeloAFrame.setAttribute('position', {x: currentPos.x, y: modelo.positionY || 0, z: currentPos.z});
         }
 
-        function cargarModelo(modeloConfig) {
-            // Limpiar anterior
-            if (modelo3D) {
-                scene.remove(modelo3D);
-            }
-            if (mixer) {
-                mixer.stopAllAction();
-                mixer = null;
-            }
-
-            console.log("Cargando: ", modeloConfig.url);
-
-            // Cargar nuevo
-            loader.load(modeloConfig.url, function (gltf) {
-                modelo3D = gltf.scene;
-                modelo3D.scale.set(modeloConfig.scale, modeloConfig.scale, modeloConfig.scale); 
-                modelo3D.position.set(0, modeloConfig.positionY, -1); 
-                scene.add(modelo3D);
-                
-                // Animaciones
-                if (gltf.animations && gltf.animations.length) {
-                    mixer = new THREE.AnimationMixer(modelo3D);
-                    gltf.animations.forEach((clip) => {
-                        mixer.clipAction(clip).play();
-                    });
-                }
-            }, undefined, function (error) {
-                console.error("Error al cargar el modelo:", error);
-                const textoOriginal = toastMessage.innerText;
-                toastMessage.innerText = "Error cargando modelo";
-                toastMessage.style.opacity = '1';
-                setTimeout(() => { 
-                    toastMessage.style.opacity = '0'; 
-                    setTimeout(() => { toastMessage.innerText = textoOriginal; }, 300);
-                }, 3000);
-            });
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(render);
-        }
-
-        function render() {
-            const delta = clock.getDelta();
-            if (mixer) mixer.update(delta);
-            renderer.render(scene, camera);
-        }
-
-        // 5. EVENTOS DE LOS BOTONES
-        let toastTimeout;
-        let uiTimeout;
-
-        // Botón Salir de AR (X)
-        btnExitAR.addEventListener('click', () => {
-            const session = renderer.xr.getSession();
-            if (session) {
-                session.end();
-            }
-        });
-
-        // Botón Capturar (Limpiar pantalla)
-        btnCapture.addEventListener('click', () => {
-            bottomBar.classList.add('hide-for-capture');
-            carouselContainer.classList.add('hide-for-capture');
-            btnExitAR.classList.add('hide-for-capture');
-            carouselContainer.classList.remove('show-carousel'); // Asegurar cierre del carrusel
-            
-            
-            toastMessage.style.opacity = '1';
-            clearTimeout(toastTimeout);
-            clearTimeout(uiTimeout);
-
-            toastTimeout = setTimeout(() => {
-                toastMessage.style.opacity = '0';
-            }, 2500);
-
-            uiTimeout = setTimeout(() => {
-                bottomBar.classList.remove('hide-for-capture');
-                carouselContainer.classList.remove('hide-for-capture');
-                 btnExitAR.classList.remove('hide-for-capture');
-            }, 8000);
-        });
-
-        // Botón Abrir Carrusel
+        // 1. LÓGICA DE APERTURA Y CIERRE DE MENÚ DE MODELOS
         btnModels.addEventListener('click', () => {
-            carouselContainer.classList.toggle('show-carousel');
+            carouselContainer.classList.add('show-carousel');
         });
 
-        // Botón Cerrar Carrusel
         btnCloseCarousel.addEventListener('click', () => {
             carouselContainer.classList.remove('show-carousel');
         });
 
-        // Generar botones dentro del carrusel
+        // 2. CONSTRUIR LOS BOTONES DEL CARRUSEL
         function construirCarrusel() {
             carouselDiv.innerHTML = ''; 
             modelosDisponibles.forEach((modelo, index) => {
@@ -222,14 +74,248 @@ import * as THREE from 'three';
                 btnItem.className = 'model-option';
                 if (index === 0) btnItem.classList.add('active');
                 
-                btnItem.innerHTML = modelo.svg;
+                btnItem.innerHTML = `<img src="${modelo.svg}" alt="icono de ${modelo.id}" style="width: 100%; height: 100%;">`;
 
                 btnItem.addEventListener('click', () => {
                     document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
                     btnItem.classList.add('active');
                     cargarModelo(modelo);
+                    carouselContainer.classList.remove('show-carousel'); // Cierra tras elegir
                 });
 
                 carouselDiv.appendChild(btnItem);
             });
         }
+
+        // 3. Botón INICIAR (Pantalla completa y revelar UI)
+        btnStart.addEventListener('click', () => {
+          const elem = document.documentElement;
+          
+          // Lógica de pantalla completa mejorada para atrapar bloqueos de seguridad
+          try {
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(err => {
+                console.warn(`Error al intentar pantalla completa: ${err.message}. (Normal en iOS o Iframes)`);
+              });
+            } else if (elem.webkitRequestFullscreen) { /* Safari / iOS antiguo */
+              elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* Edge antiguo */
+              elem.msRequestFullscreen();
+            }
+          } catch (e) {
+            console.warn("La API de Fullscreen no está soportada en este navegador.");
+          }
+          
+          welcomeScreen.classList.add('hidden');
+          arUI.classList.add('active');
+        });
+
+        // 4. Botón SALIR (Recargar página)
+        if (btnExitAR) {
+          btnExitAR.addEventListener('click', () => {
+            window.location.reload();
+          });
+        }
+
+        // 5. Botón eliminat (Ocultar modelo actual para ponerlo en otro lado)
+        const btnCamara = document.getElementById('btn-eliminar');
+        btnCamara.addEventListener('click', () => {
+          modeloAFrame.setAttribute('visible', 'false');
+          btnCamara.style.transform = 'scale(0.8)';
+          setTimeout(() => { btnCamara.style.transform = 'scale(1)'; }, 200);
+        });
+
+        // 6. NUEVA LÓGICA DEL BOTÓN DE CAPTURA (FOTO PERFECTA AR)
+        btnCapture.addEventListener('click', () => {
+            // A. Ocultar la UI
+            arUI.style.visibility = 'hidden';
+            if(btnExitAR) btnExitAR.style.display = 'none';
+            
+            // Damos un pequeño respiro de 100ms para asegurar que los botones se fueron
+            setTimeout(() => {
+                // Conseguimos el video del mundo real, el lienzo 3D y la escena de A-Frame
+                const video = document.querySelector('video');
+                const canvas3D = document.querySelector('canvas.a-canvas');
+                const sceneEl = document.querySelector('a-scene'); // <-- NUEVO: Obtenemos la escena
+                
+                // Creamos un lienzo 2D del tamaño exacto de la pantalla
+                const captureCanvas = document.createElement('canvas');
+                captureCanvas.width = window.innerWidth;
+                captureCanvas.height = window.innerHeight;
+                const ctx = captureCanvas.getContext('2d');
+                
+                // Paso 1: Dibujar la cámara de fondo
+                if (video) {
+                    const videoRatio = video.videoWidth / video.videoHeight;
+                    const windowRatio = window.innerWidth / window.innerHeight;
+                    let drawWidth, drawHeight, startX, startY;
+
+                    // Lógica para emular "object-fit: cover" y evitar distorsión
+                    if (windowRatio > videoRatio) {
+                        drawWidth = window.innerWidth;
+                        drawHeight = window.innerWidth / videoRatio;
+                        startX = 0;
+                        startY = (window.innerHeight - drawHeight) / 2;
+                    } else {
+                        drawWidth = window.innerHeight * videoRatio;
+                        drawHeight = window.innerHeight;
+                        startX = (window.innerWidth - drawWidth) / 2;
+                        startY = 0;
+                    }
+                    ctx.drawImage(video, startX, startY, drawWidth, drawHeight);
+                }
+                
+                // Paso 2: FORZAR RENDER Y DIBUJAR EL MODELO 3D
+                if (canvas3D && sceneEl && sceneEl.renderer) {
+                    // Magia: Obligamos a A-Frame a pintar el frame exacto en este milisegundo.
+                    // Esto evita que el modelo 3D esté transparente o vacío al tomar la foto.
+                    sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+                    
+                    // Ahora copiamos el lienzo 3D (que ya tiene tu modelo seguro) por encima del video
+                    ctx.drawImage(canvas3D, 0, 0, captureCanvas.width, captureCanvas.height);
+                }
+                
+                // B. Efecto Visual de "Flash" fotográfico
+                const flash = document.createElement('div');
+                flash.style.position = 'absolute';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.width = '100%';
+                flash.style.height = '100%';
+                flash.style.backgroundColor = 'white';
+                flash.style.zIndex = '9999';
+                flash.style.transition = 'opacity 0.4s ease-out';
+                document.body.appendChild(flash);
+                
+                // C. Procesar y descargar la imagen
+                const link = document.createElement('a');
+                // Create a timestamped filename: WebAR-XdevLab-YYYYMMDD-HHMMSS.jpeg
+                const now = new Date();
+                const pad = (n) => n.toString().padStart(2, '0');
+                const filename = `WebAR-XdevLab-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.jpeg`;
+                link.download = filename;
+                link.href = captureCanvas.toDataURL('image/jpeg');
+                link.click();
+                
+                // D. Restaurar la pantalla
+                setTimeout(() => {
+                    arUI.style.visibility = 'visible';
+                    if(btnExitAR) btnExitAR.style.display = 'flex';
+                    
+                    flash.style.opacity = '0'; // Apagar el flash suavemente
+                    setTimeout(() => { flash.remove(); }, 400); 
+                }, 50);
+                
+            }, 100); 
+        });
+
+        // 7. INICIO AUTOMÁTICO: Inicializar carrusel y cargar el modelo base
+        construirCarrusel();
+        cargarModelo(modelosDisponibles[0]);
+      });
+ // 8. LÓGICA DE POLVO/RED ANIMADA EN EL FONDO
+const canvas = document.getElementById('canvas-polvo');
+const ctx = canvas.getContext('2d');
+
+// Ajustar el canvas al tamaño de la pantalla
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particulas = [];
+// Puedes cambiar este número para tener más o menos polvo
+const cantidadPolvo = 50; 
+// Distancia máxima para que se dibuje una línea entre dos partículas
+const distanciaConexion = 100; 
+
+class Particula {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        // Tamaño de la partícula
+        this.size = Math.random() * 5 + 0.5; 
+        // Velocidad
+        this.speedX = Math.random() * 0.4 - 0.2; 
+        this.speedY = Math.random() * 0.4 - 0.2; 
+        // Opacidad de la partícula
+        this.opacity = Math.random() * 0.4 + 0.1; 
+    }
+
+    actualizar() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        // Si la partícula sale de la pantalla, la hacemos reaparecer por el lado opuesto
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+    }
+
+    dibujar() {
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function iniciar() {
+    for (let i = 0; i < cantidadPolvo; i++) {
+        particulas.push(new Particula());
+    }
+}
+
+// --- NUEVA FUNCIÓN PARA DIBUJAR LAS LÍNEAS ---
+function conectarParticulas() {
+    for (let a = 0; a < particulas.length; a++) {
+        // Empezamos en 'a' para no repetir pares de partículas (ahorra rendimiento)
+        for (let b = a; b < particulas.length; b++) {
+            
+            // Fórmula matemática para calcular la distancia entre dos puntos
+            let dx = particulas[a].x - particulas[b].x;
+            let dy = particulas[a].y - particulas[b].y;
+            let distancia = Math.sqrt(dx * dx + dy * dy);
+
+            // Si están lo suficientemente cerca, dibujamos la línea
+            if (distancia < distanciaConexion) {
+                // Calcula la opacidad (más cerca = más visible, más lejos = más transparente)
+                let opacidadLinea = 1 - (distancia / distanciaConexion);
+                
+                // Reducimos la opacidad general a 0.3 para que no brille demasiado
+                ctx.strokeStyle = `rgba(255, 255, 255, ${opacidadLinea * 0.5})`; 
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particulas[a].x, particulas[a].y);
+                ctx.lineTo(particulas[b].x, particulas[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+// ---------------------------------------------
+
+function animar() {
+    // Limpia el canvas en cada fotograma
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 1. Primero actualizamos y dibujamos las partículas
+    for (let i = 0; i < particulas.length; i++) {
+        particulas[i].actualizar();
+        particulas[i].dibujar();
+    }
+    
+    // 2. Luego dibujamos las líneas que las conectan
+    conectarParticulas();
+    
+    requestAnimationFrame(animar);
+}
+
+iniciar();
+animar();
+
+// Redimensionar el canvas si el usuario cambia el tamaño de la ventana
+window.addEventListener('resize', function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
