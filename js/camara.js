@@ -35,7 +35,7 @@
             { 
                 id: 'huevo', 
                 url: 'assets/modelos/egg.glb', 
-                scale: 0.1, 
+                scale: 0.6, 
                 positionY: -0.2,
                 svg: 'assets/miniatura/layer1.svg'
             },
@@ -208,12 +208,10 @@
                 
             }, 100); 
         });
-
         // 7. INICIO AUTOMÁTICO: Inicializar carrusel y cargar el modelo base
         construirCarrusel();
         cargarModelo(modelosDisponibles[0]);
-      });
- // 8. LÓGICA DE POLVO/RED ANIMADA EN EL FONDO
+        // 8. LÓGICA DE POLVO/RED ANIMADA EN EL FONDO
 const canvas = document.getElementById('canvas-polvo');
 const ctx = canvas.getContext('2d');
 
@@ -319,3 +317,5 @@ window.addEventListener('resize', function() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+});
+
