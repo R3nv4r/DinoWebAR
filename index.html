@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Experiencia AR - XdevLab</title>
+    <title>DinoWebAR- Experiencia AR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     
     <!-- 1. A-Frame -->
@@ -50,19 +50,20 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #a72df8 0%, #69006d 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        z-index: 5; 
-        transition: opacity 0.5s ease;
-        text-align: center;
-        padding: 30px;
-        box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            
+            background: linear-gradient(135deg, #0cc42a 0%, #1b5700 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 5; 
+            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
       }
       #welcome-screen.hidden {
         opacity: 0;
@@ -70,114 +71,113 @@
       }
       .welcome-logo{
         width: 140px;
-        height: 140px;
-        margin-bottom: 25px;
-        background: rgb(197, 194, 194);
-        border-radius: 50%;
-        padding: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        display: flex;
-        justify-content: center; 
-        align-items: center; 
+            height: 140px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
       }
       .welcome-logo img{
-        width:160%;
+            width:160%;
         }
       .texto h1 { 
-        margin: 0 0 10px 0;
-        font-size: 36px;
-        font-weight: 800;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        letter-spacing: 1px; }
+            margin: 0 0 10px 0;
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px; }
       .texto p { 
-        margin: 0 0 10px 0; 
-        font-size: 16px;
-        line-height: 1.6;
-        max-width: 500px;
-        color: #f0f0f0;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+            margin: 0 0 10px 0; 
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 500px;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
       .leyenda { 
-        font-size: 12px;
-        color: #b2bbb0; 
-        margin: 100px 0 0 0; 
-        bottom: 0px; }
+            font-size: 12px;
+            color: #8bf06c; 
+            margin: 100px 0 0 0; 
+            bottom: 0px; }
       
       /* ESTILOS DE BOTONES */
       #btn-exit-ar {
-        width: 20px;
-        height: 30px;
-        top: 20px;
-        right: 20px;
-        position: absolute;
-        background: rgba(255, 255, 255, 0.7);
-        border: 2px solid #000;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        pointer-events: auto;
-        z-index: 20;
-        font-weight: bold;
-        font-size: 18px;
-        color: black;
+            width: 20px;
+            height: 30px;
+            top: 20px;
+            right: 20px;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 20;
+            font-weight: bold;
+            font-size: 18px;
+            color: black;
         }
       
       #btn-start {
-        position: static !important;
-        margin-top: 10% !important; 
-        transform: none !important; 
-        width: auto !important; 
-        left: auto !important;
-        bottom: auto !important;
-        opacity: 1 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        background-color: #22c522 !important; 
-        color: white !important;
-        border-radius: 30px !important; 
-        border: 2px solid rgba(255, 255, 255, 0.8) !important; 
-        font-weight: bold !important;
-        padding: 18px 36px !important; 
-        font-size: 16px !important; 
-        line-height: 1 !important; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
-        transition: transform 0.2s ease, background-color 0.2s ease !important;
-        letter-spacing: 1px !important;
-        white-space: nowrap !important; 
+        position: static !important; 
+            transform: none !important; 
+            width: auto !important; 
+            left: auto !important;
+            bottom: auto !important;
+            opacity: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background-color: #ff8c00 !important; 
+            color: white !important;
+            border-radius: 30px !important; 
+            border: 2px solid rgba(255, 255, 255, 0.8) !important; 
+            font-weight: bold !important;
+            padding: 16px 32px !important; 
+            font-size: 16px !important; 
+            line-height: 1 !important; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important; 
+            transition: transform 0.2s ease, background-color 0.2s ease !important;
+            letter-spacing: 1px !important;
+            white-space: nowrap !important; 
       }
 
       /* ESTILOS DE LA INTERFAZ AR */
       #ar-ui {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 10;
-        display: flex; 
-        flex-direction: column;
-        justify-content: flex-end;
-        transition: opacity 0.3s ease, visibility 0.3s;
-        opacity: 0;
-        visibility: hidden;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex; 
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
       }
       #ar-ui.active {
         opacity: 1;
-        visibility: visible;
+            visibility: visible;
       }
       
       #bottom-bar {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 30px;
-        pointer-events: auto;
-        padding-bottom: 50px;
-        transition: opacity 0.3s ease;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+            pointer-events: auto;
+            padding-bottom: 50px;
+            transition: opacity 0.3s ease;
       }
       /* Reactivar los clicks solo en los botones, no en la barra entera */
       #bottom-bar button {
@@ -186,26 +186,26 @@
       
       /* ESTILOS DEL BOTÓN DE CAPTURA */
       #btn-capture {
-        width: 60px;
-        height: 70px;
-        border-radius: 50%;
-        border: 2px solid #000;
-        background-color: rgba(255, 255, 255, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: transform 0.1s ease;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
+            width: 60px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            background-color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
         #btn-capture:active {
-        transform: scale(0.9);
+            transform: scale(0.9);
         }
         #btn-capture .inner-circle {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #000;
         }
 
       .icon-btn {
@@ -277,10 +277,9 @@
             height: 40px;
         }
         .model-option.active {
-            border-color: #5200d6;
-            border: none;
+            border-color: #ff8c00;
             transform: scale(1.05);
-            
+            box-shadow: 0 6px 15px rgba(255,140,0,0.3);
         }
         #btn-close-carousel {
             background: none;
@@ -292,39 +291,27 @@
             margin-left: 10px;
             padding: 5px;
         }
-        /* ESTILOS DEL CANVAS DE POLVO */
-        #canvas-polvo {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none; 
-            z-index: 9999;
-        }
+
     </style>
   </head>
 
   <body>
-     <!-- hPANTALLA DE BIENVENIDA -->
+     <!-- PANTALLA DE BIENVENIDA -->
         
     <div id="welcome-screen">
-        <!--particulas-->
-        <canvas id="canvas-polvo"></canvas>
        
         <div class="welcome-logo">
-            <img src="assets/logo.png" alt="Logo XdevLab">
+            <img src="assets/huevo_reduc.gif" alt="Huevo animado">
         </div>
         
         <div class="texto">
-            <h1>Experiencia AR</h1>
-
-        <p>Toca el botón ¡Iniciar! Activa tu cámara, interactúa con la pantalla y vive la experiencia de realidad aumentada.</p>
+            <h1>DinoWebAR</h1>
+        <p>Para iniciar esta experiencia acepte el permiso a la camara, presiona el boton ¡INICIAR!. y disfruta de la realidad Aumentada.</p>
         </div>
          <button class="icon-btn" id="btn-start">¡Iniciar!</button>
         
         <div class="leyenda">
-            <p>XDevLab  |  Copyright © 2026 Niantic Spatial, Inc. El uso del motor XR está sujeto a la licencia del motor XR.</p>
+            <p>XDevLAb  |  Copyright © 2026 Niantic Spatial, Inc. El uso del motor XR está sujeto a la licencia del motor XR.</p>
         </div>
         
        
@@ -344,15 +331,11 @@
         <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
             <!-- Botón de Reposicionar -->
-            <button class="icon-btn" id="btn-borrar">
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <polyline points="3 6 5 6 21 6"></polyline>
-  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-  <line x1="10" y1="11" x2="10" y2="17"></line>
-  <line x1="14" y1="11" x2="14" y2="17"></line>
-</svg>            </button>
+            <button class="icon-btn" id="btn-camara">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            </button>
             
-            <!-- Botón de Captura -->
+            <!-- Botón de Captura (NUEVO) -->
             <button id="btn-capture">
                 <div class="inner-circle"></div>
             </button>
@@ -386,7 +369,7 @@
 
       <!-- 3. Apertura de assets corregida con timeout -->
       <a-assets timeout="10000">
-        <a-asset-item id="huevo" src="./assets/mur.glb"></a-asset-item>
+        <a-asset-item id="huevo" src="./assets/modelos/egg.glb"></a-asset-item>
       </a-assets>
       
       <!-- Suelo virtual invisible para detectar dónde toca el usuario -->
@@ -405,7 +388,7 @@
         id="mi-modelo"
         gltf-model="#huevo" 
         position="0 0 0" 
-        scale="0.5 0.5 0.5" 
+        scale="1 1 1" 
         visible="false"
         animation-mixer="loop: repeat; timeScale: 1"
         shadow>
@@ -431,10 +414,17 @@
         const modelosDisponibles = [
             { 
                 id: 'huevo', 
-                url: './assets/mur.glb', 
-                scale: 0.2, 
-                positionY: -0.1,
+                url: 'assets/modelos/egg.glb', 
+                scale: 0.1, 
+                positionY: -0.2,
                 svg: `<svg width="210mm" height="297mm" viewBox="0 0 210 297" version="1.1" id="svg1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><defs id="defs1" /><g id="layer1"><path style="display:inline;fill:#000000;fill-opacity:1" d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z" id="path2" /><path style="display:inline;fill:#12d227;fill-opacity:1;stroke-width:0.935016" d="M 102.59514,250.77843 C 41.95251,246.63358 15.362288,180.51005 44.209011,105.58601 67.302434,45.605138 107.61378,24.976898 140.88436,56.11503 c 34.24935,32.05417 52.14841,96.85117 39.00385,141.19919 -10.25864,34.61125 -41.09143,55.93854 -77.29307,53.46421 z" id="path2-2" /><path style="display:inline;fill:#becc88;fill-opacity:1" d="M 102.25581,257.16245 C 38.524283,252.65124 10.579664,180.683 40.895725,99.136394 65.165427,33.853781 107.53008,11.4022 142.49533,45.292647 c 35.99388,34.887457 54.80465,105.411893 40.99055,153.679863 -10.78116,37.67056 -43.18446,60.88298 -81.23007,58.18994 z m 17.2612,-1.2287 C 180.28476,246.81904 204.56514,178.02739 174.98214,98.788845 157.83722,52.8659 129.60749,26.56797 101.91918,30.725691 55.365696,37.716234 15.56377,135.92752 33.820245,198.75987 c 11.460291,39.44229 46.785806,63.01023 85.696765,57.17388 z m -17.66541,-2.87461 c -25.275443,-2.19486 -49.651379,-18.88668 -58.759296,-40.23638 -1.329127,-3.11559 -1.315743,-3.42679 0.109994,-2.5575 6.456893,3.93685 8.235192,-9.3908 4.283105,-32.10016 -2.578687,-14.81758 -9.132997,-23.98 -13.32361,-18.62539 l -0.869033,1.11042 -0.254372,-1.35592 c -1.458386,-7.77387 3.672295,-35.64667 9.904667,-53.80782 21.00001,-61.19408 58.021415,-87.121113 90.305765,-63.243419 34.80154,25.739421 58.66352,97.744499 48.67559,146.881779 -8.38331,41.24309 -41.04674,67.32332 -80.07281,63.93439 z m 32.22846,-6.82407 c 21.424,-5.9369 33.75417,-33.84102 14.86737,-33.64602 l -3.35138,0.0346 -2.97845,1.1121 c -5.78482,2.15998 -12.01465,7.33036 -15.69187,13.02332 -0.91051,1.40963 -2.03433,2.81119 -2.49737,3.11459 -2.19449,1.43788 -3.84201,11.41758 -2.35413,14.2599 1.45307,2.77581 6.42926,3.64684 12.00583,2.1015 z m -24.017,-14.48611 c 2.56697,-1.25193 3.60974,-2.49219 2.96429,-3.52572 -0.22881,-0.36639 -0.41603,-1.51762 -0.41603,-2.5583 0,-6.23342 -9.87445,-9.08894 -14.709626,-4.25376 -0.530712,0.53071 -1.446592,1.06274 -2.035289,1.18229 l -1.070358,0.21737 -0.105914,1.81849 c -0.378388,6.49677 8.355937,10.54188 15.372927,7.11963 z M 148.85368,82.300058 c 4.55573,-2.095815 3.48221,-11.224359 -2.18914,-18.615014 -6.54138,-8.524431 -14.97986,-8.66772 -16.45313,-0.279382 -1.838,10.465011 10.27624,22.743092 18.64227,18.894396 z M 95.363729,63.145757 C 105.22108,61.276348 111.03602,51.00232 105.21381,45.742301 99.392468,40.483071 85.725683,48.143831 85.166747,56.97945 l -0.133899,2.116667 0.825854,1.215648 c 1.799419,2.648729 5.174963,3.655171 9.505027,2.833992 z" id="path1" /></g></svg>` 
+            },
+            { 
+                id: 'pato_prueba', 
+                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
+                scale: 0.5, 
+                positionY: -0.2,
+                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
             }
         ];
         
@@ -508,7 +498,7 @@
         }
 
         // 5. Botón REPOSICIONAR (Ocultar modelo actual para ponerlo en otro lado)
-        const btnCamara = document.getElementById('btn-borrar');
+        const btnCamara = document.getElementById('btn-camara');
         btnCamara.addEventListener('click', () => {
           modeloAFrame.setAttribute('visible', 'false');
           btnCamara.style.transform = 'scale(0.8)';
@@ -579,12 +569,8 @@
                 
                 // C. Procesar y descargar la imagen
                 const link = document.createElement('a');
-                // Create a timestamped filename: WebAR-XdevLab-YYYYMMDD-HHMMSS.jpeg
-                const now = new Date();
-                const pad = (n) => n.toString().padStart(2, '0');
-                const filename = `WebAR-XdevLab-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.jpeg`;
-                link.download = filename;
-                link.href = captureCanvas.toDataURL('image/jpeg');
+                link.download = 'DinoWebAR-Captura.png';
+                link.href = captureCanvas.toDataURL('image/png');
                 link.click();
                 
                 // D. Restaurar la pantalla
@@ -603,77 +589,6 @@
         construirCarrusel();
         cargarModelo(modelosDisponibles[0]);
       });
-
-      // 8. LÓGICA DE POLVO ANIMADO EN EL FONDO
-      const canvas = document.getElementById('canvas-polvo');
-        const ctx = canvas.getContext('2d');
-
-        // Ajustar el canvas al tamaño de la pantalla
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const particulas = [];
-        // Puedes cambiar este número para tener más o menos polvo
-        const cantidadPolvo = 80; 
-
-        class Particula {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                // Tamaño muy pequeño para simular polvo (entre 0.5px y 2.5px)
-                this.size = Math.random() * 5 + 0.5; 
-                // Velocidad muy lenta en direcciones aleatorias
-                this.speedX = Math.random() * 0.4 - 0.2; 
-                this.speedY = Math.random() * 0.4 - 0.2; 
-                // Opacidad aleatoria para dar un efecto más realista
-                this.opacity = Math.random() * 0.2 + 0.1; 
-            }
-
-            actualizar() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-
-                // Si la partícula sale de la pantalla, la hacemos reaparecer por el lado opuesto
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
-            }
-
-            dibujar() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-            }
-        }
-
-        function iniciar() {
-            for (let i = 0; i < cantidadPolvo; i++) {
-                particulas.push(new Particula());
-            }
-        }
-
-        function animar() {
-            // Limpia el canvas en cada fotograma
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            for (let i = 0; i < particulas.length; i++) {
-                particulas[i].actualizar();
-                particulas[i].dibujar();
-            }
-            requestAnimationFrame(animar);
-        }
-
-        iniciar();
-        animar();
-
-        // Redimensionar el canvas si el usuario cambia el tamaño de la ventana
-        window.addEventListener('resize', function() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
     </script>
   </body>
 </html>
