@@ -40,8 +40,8 @@
                 svg: 'assets/miniatura/layer1.svg'
             },
             { 
-                id: 'pato_prueba', 
-                url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 
+                id: 'centrosaurus', 
+                url: 'assets/modelos/Centrosaurus.glb', 
                 scale: 0.5, 
                 positionY: -0.2,
                 svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
@@ -52,7 +52,7 @@
         function cargarModelo(modelo) {
             modeloAFrame.setAttribute('gltf-model', modelo.url);
             modeloAFrame.setAttribute('scale', `${modelo.scale} ${modelo.scale} ${modelo.scale}`);
-            // El pato y otros modelos podrían estar descentrados en Y, ajustamos un poco
+            // El centrosaurus y otros modelos podrían estar descentrados en Y, ajustamos un poco
             let currentPos = modeloAFrame.getAttribute('position') || {x: 0, y: 0, z: 0};
             modeloAFrame.setAttribute('position', {x: currentPos.x, y: modelo.positionY || 0, z: currentPos.z});
         }
