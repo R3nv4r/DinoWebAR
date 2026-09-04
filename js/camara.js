@@ -33,19 +33,40 @@
         
         const modelosDisponibles = [
             { 
-                id: 'huevo', 
-                url: 'assets/modelos/egg.glb', 
-                scale: 0.6, 
+                id: 'coahuilaceratops', 
+                url: 'assets/modelos/coahuilaceratops.glb', 
+                scale: 1, 
                 positionY: -0.2,
                 svg: 'assets/miniatura/layer1.svg'
             },
             { 
                 id: 'centrosaurus', 
                 url: 'assets/modelos/Centrosaurus.glb', 
-                scale: 0.5, 
+                scale: 1, 
                 positionY: -0.2,
-                svg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M22 12A10 10 0 1 1 12 2"></path></svg>` 
-            }
+                svg: `assets/miniatura/layer1.svg` 
+            },
+            { 
+                id: 'coahuilasaurus', 
+                url: 'assets/modelos/Coahuilasaurus.glb', 
+                scale: 1, 
+                positionY: -0.2,
+                svg: 'assets/miniatura/layer1.svg'
+            },
+            { 
+                id: 'tlatolophus', 
+                url: 'assets/modelos/tlatolophus.glb', 
+                scale: 1, 
+                positionY: -0.2,
+                svg: 'assets/miniatura/layer1.svg'
+            },
+            { 
+                id: 'velafrons', 
+                url: 'assets/modelos/velafrons.glb', 
+                scale: 1, 
+                positionY: -0.2,
+                svg: 'assets/miniatura/layer1.svg'
+            },
         ];
         
         // 0. Función para cambiar el modelo en 3D dinámicamente
