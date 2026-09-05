@@ -34,6 +34,7 @@
         const modelosDisponibles = [
             { 
                 id: 'coahuilaceratops', 
+                nombre: 'Coahuilaceratops',
                 url: 'assets/modelos/coahuilaceratops.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -41,13 +42,15 @@
             },
             { 
                 id: 'centrosaurus', 
+                nombre: 'Centrosaurus',
                 url: 'assets/modelos/Centrosaurus.glb', 
                 scale: 1, 
                 positionY: -0.2,
                 svg: `assets/miniatura/layer1.svg` 
             },
             { 
-                id: 'coahuilasaurus', 
+                id: 'coahuilasaurus',
+                nombre: 'Coahuilasaurus', 
                 url: 'assets/modelos/Coahuilasaurus.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -55,6 +58,7 @@
             },
             { 
                 id: 'tlatolophus', 
+                nombre: 'Tlatolophus',
                 url: 'assets/modelos/tlatolophus.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -62,6 +66,7 @@
             },
             { 
                 id: 'velafrons', 
+                nombre: 'Velafrons',
                 url: 'assets/modelos/velafrons.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -87,7 +92,7 @@
             carouselContainer.classList.remove('show-carousel');
         });
 
-        // 2. CONSTRUIR LOS BOTONES DEL CARRUSEL
+        // Generar botones dentro del carrusel
         function construirCarrusel() {
             carouselDiv.innerHTML = ''; 
             modelosDisponibles.forEach((modelo, index) => {
@@ -95,13 +100,16 @@
                 btnItem.className = 'model-option';
                 if (index === 0) btnItem.classList.add('active');
                 
-                btnItem.innerHTML = `<img src="${modelo.svg}" alt="icono de ${modelo.id}" style="width: 100%; height: 100%;">`;
+                // AQUÍ INYECTAMOS LA IMAGEN Y EL NOMBRE
+                btnItem.innerHTML = `
+                    <img src="${modelo.svg}" alt="${modelo.nombre}" class="carousel-icon">
+                    <span class="carousel-name">${modelo.nombre}</span>
+                `;
 
                 btnItem.addEventListener('click', () => {
                     document.querySelectorAll('.model-option').forEach(el => el.classList.remove('active'));
                     btnItem.classList.add('active');
                     cargarModelo(modelo);
-                    carouselContainer.classList.remove('show-carousel'); // Cierra tras elegir
                 });
 
                 carouselDiv.appendChild(btnItem);

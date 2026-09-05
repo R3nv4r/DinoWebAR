@@ -262,3 +262,65 @@
             pointer-events: none; 
             z-index: 0;
         }
+ #model-carousel {
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto; /* Permite scroll horizontal fluido */
+            gap: 15px; /* Espacio rígido entre botones para que NUNCA se toquen */
+            padding: 10px 15px; /* Espacio extra en los bordes */
+            scroll-behavior: smooth;
+        }
+
+        /* Diseño de cada botón */
+        .model-option {
+            width: 100px; /* Ligeramente más ancho para dar espacio al texto */
+            height: 90px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0; /* MUY IMPORTANTE: Evita que los botones se encojan y se aplasten */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 8px 4px 4px 4px;
+            box-sizing: border-box; /* Asegura que el padding no rompa el ancho total */
+        }
+
+        .model-option.active {
+            border-color: #ff3b30;
+            transform: scale(1.05); /* Efecto de crecimiento al tocarlo */
+            background: #ffffff;
+        }
+
+        /* Icono (SVG) dentro del botón */
+        .carousel-icon {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+
+        /* Texto del nombre del dinosaurio */
+        .carousel-name {
+            font-size: 11px;
+            font-family: sans-serif;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            
+            /* LA MAGIA PARA EVITAR EL TRASLAPE */
+            display: block;
+            width: 100%; /* Fuerza al texto a respetar los límites del botón (100px) */
+            white-space: nowrap; /* Impide que el texto se parta en dos renglones */
+            overflow: hidden; /* Corta de tajo cualquier letra que se salga del botón */
+            text-overflow: ellipsis; /* Si se pasa, añade "..." al final de forma automática */
+        }
+
+        /* Ocultar scrollbar antiestética en Chrome/Safari */
+        #model-carousel::-webkit-scrollbar {
+            display: none;
+        }

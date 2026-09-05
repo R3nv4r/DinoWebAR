@@ -85,26 +85,18 @@
       <!-- La cámara. 8th Wall toma el control de su posición y rotación basándose en tu entorno -->
       <a-camera position="0 1.6 0"></a-camera>
       
-      <!-- Luces para que la esfera tenga volumen y no se vea plana -->
-      <a-light type="directional" position="1 2 -1" intensity="0.8"></a-light>
-      <a-light type="ambient" intensity="0.5"></a-light>
+       <!-- 2. LUCES: Una luz ambiental base y un "Sol" direccional que genera la sombra -->
+      <a-entity light="type: ambient; intensity: 2;"></a-entity>
+      <a-entity 
+        light="type: directional; castShadow: true; intensity: 0.6; shadowMapHeight: 2048; shadowMapWidth: 2048; shadowCameraTop: 15; shadowCameraRight: 15; shadowCameraBottom: -15; shadowCameraLeft: -15;" 
+        position="1 10 5">
+      </a-entity>
 
       <!-- 3. Apertura de assets corregida con timeout -->
       <a-assets timeout="10000">
         <a-asset-item id="huevo" src="./assets/modelos/Centrosaurus.glb"></a-asset-item>
       </a-assets>
       
-      <!-- Suelo virtual invisible para detectar dónde toca el usuario -->
-      <a-plane 
-        id="ground" 
-        class="cantap" 
-        position="0 0 0" 
-        rotation="-90 0 0" 
-        width="1000" 
-        height="1000" 
-        material="transparent: true; opacity: 0;">
-      </a-plane>
-
       <!-- Tu modelo, ahora con la etiqueta animation-mixer añadida -->
       <a-entity 
         id="mi-modelo"
@@ -114,6 +106,23 @@
         visible="false"
         animation-mixer="loop: repeat; timeScale: 1"
         shadow>
+      </a-entity>
+         <!-- 3. SUELO: Se le añade el shader de sombra para que sea invisible pero atrape las siluetas -->
+      <a-plane 
+        id="ground" 
+        class="cantap" 
+        rotation="-90 0 0" 
+        width="1000" 
+        height="1000" 
+        material="shader: shadow; opacity: 0.3; transparent: true"
+        shadow="receive: true">
+      </a-plane>
+       <!-- 4. MODELO: Se le indica que proyecte sombras (cast: true) y reciba luz -->
+      <a-entity 
+        id="mi-modelo" 
+        visible="false"
+        animation-mixer="loop: repeat; timeScale: 1"
+        shadow="cast: true; receive: true">
       </a-entity>
     </a-scene>
     
