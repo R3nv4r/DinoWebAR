@@ -5,6 +5,7 @@
     <title>DinoWebAR- Experiencia AR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./css/styles.css">
+    <script src="./js/camara.js" defer></script>
     <!-- 1. A-Frame -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     
@@ -15,14 +16,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@latest/dist/xr.js" data-preload-chunks="slam"></script>
     <script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@latest/dist/xrextras.js"></script>
     <script src="./external/xr/xr.js"></script>
-    <script src="./js/camara.js"></script>
-  
   </head>
 
   <body>
-     <!-- PANTALLA DE BIENVENIDA -->
     <div id="welcome-screen">
-      <!--particulas-->
         <canvas id="canvas-polvo"></canvas>
        
         <div class="welcome-logo">
@@ -31,16 +28,15 @@
         
         <div class="texto">
             <h1>DinoWebAR</h1>
-        <p>Toca el botón ¡Iniciar! Activa tu cámara, interactúa con la pantalla y vive la experiencia de realidad aumentada.</p>
+            <p>Toca el botón ¡Iniciar! Activa tu cámara, interactúa con la pantalla y vive la experiencia de realidad aumentada.</p>
         </div>
-         <button class="icon-btn" id="btn-start">¡Iniciar!</button>
+        <button class="icon-btn" id="btn-start">¡Iniciar!</button>
         
         <div class="leyenda">
             <p>XDevLAb  |  Copyright © 2026 Niantic Spatial, Inc. El uso del motor XR está sujeto a la licencia del motor XR.</p>
         </div>
     </div>
 
-    <!-- MODAL DE INFORMACIÓN (NUEVO - EXTRAÍDO AL NIVEL PRINCIPAL) -->
     <div id="info-modal">
         <div class="info-content">
             <button id="btn-close-info">X</button>
@@ -51,20 +47,21 @@
 
     <!-- UI DE REALIDAD AUMENTADA -->
     <div id="ar-ui">
-        
+        <!-- Elemento de Audio Oculto -->
+        <audio id="dino-audio" preload="auto"></audio>
+
         <button id="btn-exit-ar">X</button>
 
         <!-- Carrusel de Modelos -->
         <div id="model-carousel-container">
             <div id="model-carousel"></div>
-            <button id="btn-close-carousel">×</button>
+            <button id="btn-close-carousel">X</button>
         </div>
 
         <!-- Barra inferior de acciones -->
         <div id="bottom-bar">
-            <!-- Botón Información (ANTES ELIMINAR) -->
+            <!-- Botón Información -->
             <button class="icon-btn" id="btn-info">
-              <!-- Icono de información "i" con pointer-events anulados para evitar conflictos de toque -->
               <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
               </svg>
@@ -77,53 +74,54 @@
 
             <!-- Botón de Modelos -->
             <button class="icon-btn" id="btn-models">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <svg style="pointer-events: none;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
             </button>
         </div>
     </div>
     
-    <a-scene
-      tap-to-place
-      xrextras-gesture-detector
-      xrextras-almost-there
-      xrextras-loading
-      xrextras-runtime-error
-      renderer="colorManagement: true; preserveDrawingBuffer: true"
-      xrweb="data-preload-chunks: slam"
-      cursor="rayOrigin: mouse; fuse: false"
-      raycaster="objects: .cantap">
-      
-      <a-camera position="0 1.6 0"></a-camera>
-      
-      <a-entity light="type: ambient; intensity: 2;"></a-entity>
-      <a-entity 
-        light="type: directional; castShadow: true; intensity: 0.6; shadowMapHeight: 2048; shadowMapWidth: 2048; shadowCameraTop: 15; shadowCameraRight: 15; shadowCameraBottom: -15; shadowCameraLeft: -15;" 
-        position="1 10 5">
-      </a-entity>
+    <!-- PLANTILLA A-FRAME: La cámara y la escena NO se inician hasta que esta plantilla sea inyectada -->
+    <template id="ar-template">
+      <a-scene
+        tap-to-place
+        xrextras-gesture-detector
+        xrextras-almost-there
+        xrextras-loading
+        xrextras-runtime-error
+        renderer="colorManagement: true; preserveDrawingBuffer: true"
+        xrweb="data-preload-chunks: slam"
+        cursor="rayOrigin: mouse; fuse: false"
+        raycaster="objects: .cantap">
+        
+        <a-camera position="0 1.6 0"></a-camera>
+        
+        <a-entity light="type: ambient; intensity: 2;"></a-entity>
+        <a-entity 
+          light="type: directional; castShadow: true; intensity: 0.6; shadowMapHeight: 2048; shadowMapWidth: 2048; shadowCameraTop: 15; shadowCameraRight: 15; shadowCameraBottom: -15; shadowCameraLeft: -15;" 
+          position="1 10 5">
+        </a-entity>
 
-      <a-assets timeout="10000">
-        <a-asset-item id="huevo" src="./assets/modelos/Centrosaurus.glb"></a-asset-item>
-      </a-assets>
-      
-      <!-- Suelo -->
-      <a-plane 
-        id="ground" 
-        class="cantap" 
-        rotation="-90 0 0" 
-        width="1000" 
-        height="1000" 
-        material="shader: shadow; opacity: 0.3; transparent: true"
-        shadow="receive: true">
-      </a-plane>
+        <a-assets timeout="10000">
+          <a-asset-item id="huevo" src="./assets/modelos/Centrosaurus.glb"></a-asset-item>
+        </a-assets>
+        
+        <a-plane 
+          id="ground" 
+          class="cantap" 
+          rotation="-90 0 0" 
+          width="1000" 
+          height="1000" 
+          material="shader: shadow; opacity: 0.3; transparent: true"
+          shadow="receive: true">
+        </a-plane>
 
-      <!-- Modelo -->
-      <a-entity 
-        id="mi-modelo" 
-        visible="false"
-        animation-mixer="loop: repeat; timeScale: 1"
-        shadow="cast: true; receive: true">
-      </a-entity>
-    </a-scene>
+        <a-entity 
+          id="mi-modelo" 
+          visible="false"
+          animation-mixer="loop: repeat; timeScale: 1"
+          shadow="cast: true; receive: true">
+        </a-entity>
+      </a-scene>
+    </template>
     
    </body>
 </html>

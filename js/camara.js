@@ -1,4 +1,4 @@
-   AFRAME.registerComponent('tap-to-place', {
+      AFRAME.registerComponent('tap-to-place', {
         init: function() {
           const ground = document.getElementById('ground');
           const modelo = document.getElementById('mi-modelo');
@@ -29,6 +29,17 @@
             }
             
             modelo.setAttribute('visible', 'true');
+            
+            // Sincronizar audio con animación al colocar
+            const audioEl = document.getElementById('dino-audio');
+            if (audioEl && window.modeloActualConfig) {
+                modelo.removeAttribute('animation-mixer'); 
+                setTimeout(() => {
+                    modelo.setAttribute('animation-mixer', 'loop: repeat; timeScale: 1'); 
+                    audioEl.currentTime = 0;
+                    audioEl.play().catch(e => console.warn('Requiere interacción previa', e));
+                }, 10);
+            }
           });
         }
       });
@@ -44,22 +55,20 @@
         const carouselContainer = document.getElementById('model-carousel-container');
         const btnCloseCarousel = document.getElementById('btn-close-carousel');
         const carouselDiv = document.getElementById('model-carousel');
-        const modeloAFrame = document.getElementById('mi-modelo');
         
-        // Elementos del Modal de Información
         const btnInfo = document.getElementById('btn-info');
         const infoModal = document.getElementById('info-modal');
         const btnCloseInfo = document.getElementById('btn-close-info');
         const infoTitle = document.getElementById('info-title');
         const infoDescription = document.getElementById('info-description');
 
-        // Añadida la propiedad "descripcion" para cada dinosaurio
         const modelosDisponibles = [
             { 
                 id: 'coahuilaceratops', 
                 nombre: 'Coahuilaceratops',
                 descripcion: 'El Coahuilaceratops fue un dinosaurio herbívoro ceratópsido. Habitó en lo que hoy es México durante el periodo Cretácico. Es famoso por tener unos de los cuernos faciales más grandes jamás descubiertos.',
                 url: 'assets/modelos/coahuilaceratops.glb', 
+                audio: 'assets/audios/audio1.mp3',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0', 
@@ -71,6 +80,7 @@
                 nombre: 'Centrosaurus',
                 descripcion: 'Dinosaurio herbívoro de la familia de los ceratópsidos. Se caracterizaba por tener un gran cuerno nasal y un volante óseo en el cuello con proyecciones ganchudas.',
                 url: 'assets/modelos/Centrosaurus.glb', 
+                audio: 'assets/audios/audio1.mp3',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -82,6 +92,7 @@
                 nombre: 'Coahuilasaurus', 
                 descripcion: 'Un majestuoso dinosaurio "pico de pato" (hadrosaurio) descubierto en la región de Coahuila. Vivía en manadas y poseía fuertes mandíbulas para triturar vegetación.',
                 url: 'assets/modelos/Coahuilasaurus.glb', 
+                audio: 'assets/audios/audio1.mp3',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -93,6 +104,7 @@
                 nombre: 'Tlatolophus',
                 descripcion: 'El Tlatolophus es un hadrosaurio reconocido por su cresta hueca en forma de "coma" en la cabeza, la cual probablemente usaba para emitir sonidos de baja frecuencia y comunicarse.',
                 url: 'assets/modelos/tlatolophus.glb', 
+                audio: 'assets/audios/tlatolophus.mp3',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -104,6 +116,19 @@
                 nombre: 'Velafrons',
                 descripcion: 'Su nombre significa "Frente de vela". Este hadrosaurio poseía una cresta ósea en la frente y vivió hace más de 70 millones de años en un entorno rico en vegetación costera.',
                 url: 'assets/modelos/velafrons.glb', 
+                audio: 'assets/audios/velafrons.mp3',
+                scale: 1, 
+                positionY: -0.2,
+                rotacion: '0 0 0',
+                svg: 'assets/miniatura/layer1.svg',
+                svgActivo: 'assets/miniatura/open1.svg'
+            },
+            { 
+                id: 'latirhinus', 
+                nombre: 'Latirhinus',
+                descripcion: 'Su nombre significa "Frente de vela". Este hadrosaurio poseía una cresta ósea en la frente y vivió hace más de 70 millones de años en un entorno rico en vegetación costera.',
+                url: 'assets/modelos/Latirhinus.glb', 
+                audio: 'assets/audios/latirhinus.mp3',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -114,6 +139,28 @@
         
         function cargarModelo(modelo) {
             window.modeloActualConfig = modelo; 
+            
+            const audioEl = document.getElementById('dino-audio');
+            if (audioEl) {
+                audioEl.src = modelo.audio;
+                
+                const modeloAFrame = document.getElementById('mi-modelo');
+                if (modeloAFrame) {
+                    const isVisible = modeloAFrame.getAttribute('visible');
+                    if (isVisible === true || isVisible === 'true') {
+                        modeloAFrame.removeAttribute('animation-mixer');
+                        setTimeout(() => {
+                            modeloAFrame.setAttribute('animation-mixer', 'loop: repeat; timeScale: 1');
+                            audioEl.currentTime = 0;
+                            audioEl.play().catch(e => console.warn('Audio autoplay bloqueado', e));
+                        }, 10);
+                    }
+                }
+            }
+
+            const modeloAFrame = document.getElementById('mi-modelo');
+            if (!modeloAFrame) return; // Evita error si el modelo aun no existe en el DOM
+
             modeloAFrame.setAttribute('gltf-model', modelo.url);
             modeloAFrame.setAttribute('scale', `${modelo.scale} ${modelo.scale} ${modelo.scale}`);
             
@@ -136,6 +183,7 @@
         });
 
         function construirCarrusel() {
+            if(!carouselDiv) return;
             carouselDiv.innerHTML = ''; 
             
             modelosDisponibles.forEach((modelo) => {
@@ -205,11 +253,24 @@
         }
 
         btnStart.addEventListener('click', () => {
+          // Desbloqueo de seguridad de audio para iOS/Android silencioso
+          const audioEl = document.getElementById('dino-audio');
+          if (audioEl) {
+             audioEl.muted = true;
+             audioEl.play().then(() => {
+                 audioEl.pause();
+                 audioEl.currentTime = 0;
+                 audioEl.muted = false; 
+             }).catch(() => {
+                 audioEl.muted = false;
+             });
+          }
+
           const elem = document.documentElement;
           try {
             if (elem.requestFullscreen) {
               elem.requestFullscreen().catch(err => {
-                console.warn(`Error al intentar pantalla completa: normal en iOS o Iframes`);
+                console.warn(`Error al intentar pantalla completa`);
               });
             } else if (elem.webkitRequestFullscreen) { 
               elem.webkitRequestFullscreen();
@@ -222,6 +283,28 @@
           
           welcomeScreen.classList.add('hidden');
           arUI.classList.add('active');
+
+          // Inyectar la escena 3D exactamente al momento de Iniciar
+          if (!document.querySelector('a-scene')) {
+              const template = document.getElementById('ar-template');
+              document.body.appendChild(template.content.cloneNode(true));
+              
+              // Conectar eventos del modelo un instante después de inyectarlo al DOM
+              setTimeout(() => {
+                  const modeloAFrame = document.getElementById('mi-modelo');
+                  if (modeloAFrame) {
+                      modeloAFrame.addEventListener('animation-loop', () => {
+                          const isVisible = modeloAFrame.getAttribute('visible');
+                          if ((isVisible === true || isVisible === 'true') && audioEl) {
+                              audioEl.currentTime = 0;
+                              audioEl.play().catch(e => console.warn(e));
+                          }
+                      });
+                      // Cargar el modelo que el usuario tenga seleccionado en el carrusel
+                      cargarModelo(window.modeloActualConfig || modelosDisponibles[0]);
+                  }
+              }, 500);
+          }
         });
 
         if (btnExitAR) {
@@ -230,32 +313,21 @@
           });
         }
 
-        // --- LÓGICA DEL BOTÓN DE INFORMACIÓN (MODIFICADO) ---
         function mostrarInformacion(e) {
-          if (e) e.preventDefault(); // Evitar comportamientos por defecto que puedan bloquear el clic
-          
-          // Animación del botón
+          if (e) e.preventDefault(); 
           btnInfo.style.transform = 'scale(0.8)';
           setTimeout(() => { btnInfo.style.transform = 'scale(1)'; }, 200);
           
-          // Llenar textos
           if (window.modeloActualConfig) {
               infoTitle.textContent = window.modeloActualConfig.nombre;
               infoDescription.textContent = window.modeloActualConfig.descripcion || 'Información no disponible.';
-          } else {
-              infoTitle.textContent = 'Dinosaurio';
-              infoDescription.textContent = 'Información no disponible.';
           }
-          
-          // Mostrar modal (usando display: flex a través de la clase active)
           infoModal.classList.add('active');
         }
 
-        // Asignar tanto click como touchstart para máxima compatibilidad en móviles/Safari
         btnInfo.addEventListener('click', mostrarInformacion);
         btnInfo.addEventListener('touchstart', mostrarInformacion, {passive: false});
 
-        // Evento para cerrar el Modal de Información
         function cerrarInformacion(e) {
             if (e) e.preventDefault();
             infoModal.classList.remove('active');
@@ -330,7 +402,7 @@
         });
 
         construirCarrusel();
-        cargarModelo(modelosDisponibles[0]);
+        window.modeloActualConfig = modelosDisponibles[0]; 
 
         const canvas = document.getElementById('canvas-polvo');
         const ctx = canvas.getContext('2d');

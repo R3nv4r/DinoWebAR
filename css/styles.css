@@ -17,7 +17,7 @@
         justify-content: center;
         align-items: center;
         color: white;
-        z-index: 5; 
+        z-index: 50; 
         transition: opacity 0.5s ease;
         text-align: center;
         padding: 30px;
@@ -215,19 +215,16 @@
         padding: 5px;
       }
 
-      /* Ruleta magnética (Rolling Carousel) */
       #model-carousel {
         display: flex;
         flex-direction: row;
         overflow-x: auto; 
         gap: 15px; 
-        /* Padding mágico para que el primero y el último lleguen al centro */
         padding: 20px calc(50% - 50px); 
         scroll-behavior: smooth;
         scroll-snap-type: x mandatory; 
       }
 
-      /* Diseño de cada botón */
       .model-option {
         width: 100px; 
         height: 90px;
@@ -244,14 +241,11 @@
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         padding: 8px 4px 4px 4px;
         box-sizing: border-box; 
-        
-        /* Efecto rolling: Por defecto son opacos y pequeños */
         transform: scale(0.85);
         opacity: 0.6;
         scroll-snap-align: center;
       }
 
-      /* Estado Activo y Lupa (Centro) */
       .model-option.center-focus {
         transform: scale(1.1); 
         opacity: 1;
@@ -265,7 +259,6 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.2);
       }
 
-      /* Icono (SVG) dentro del botón */
       .carousel-icon {
         width: 45px;
         height: 45px;
@@ -273,7 +266,6 @@
         margin-bottom: 6px;
       }
 
-      /* Texto del nombre del dinosaurio */
       .carousel-name {
         font-size: 11px;
         font-family: sans-serif;
@@ -301,7 +293,6 @@
         z-index: 0;
       }
 
-      /* --- NUEVOS ESTILOS PARA EL MODAL DE INFORMACIÓN --- */
       #info-modal {
         position: fixed;
         top: 0;
@@ -311,13 +302,13 @@
         background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(6px);
         z-index: 999999; 
-        display: none; /* Ahora usamos none en vez de visibility para móviles */
+        display: none; 
         justify-content: center;
         align-items: center;
       }
 
       #info-modal.active {
-        display: flex; /* Se muestra al activarse */
+        display: flex; 
         animation: fadeInModal 0.3s ease forwards;
       }
       
