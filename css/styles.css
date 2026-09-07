@@ -1,4 +1,4 @@
- body { 
+      body { 
         margin: 0; 
         overflow: hidden; 
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -253,7 +253,6 @@
 
       /* Estado Activo y Lupa (Centro) */
       .model-option.center-focus {
-        
         transform: scale(1.1); 
         opacity: 1;
         background: #b5b6b5;
@@ -300,4 +299,83 @@
         height: 100vh;
         pointer-events: none; 
         z-index: 0;
+      }
+
+      /* --- NUEVOS ESTILOS PARA EL MODAL DE INFORMACIÓN --- */
+      #info-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(6px);
+        z-index: 999999; 
+        display: none; /* Ahora usamos none en vez de visibility para móviles */
+        justify-content: center;
+        align-items: center;
+      }
+
+      #info-modal.active {
+        display: flex; /* Se muestra al activarse */
+        animation: fadeInModal 0.3s ease forwards;
+      }
+      
+      @keyframes fadeInModal {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .info-content {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 20px;
+        width: 80%;
+        max-width: 400px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        animation: popIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+      }
+
+      @keyframes popIn {
+        from { transform: scale(0.8); }
+        to { transform: scale(1); }
+      }
+
+      #btn-close-info {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background 0.2s;
+      }
+
+      #btn-close-info:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .info-content h2 {
+        margin-top: 10px;
+        color: #1b5700;
+        font-size: 26px;
+        font-weight: 800;
+      }
+
+      .info-content p {
+        font-size: 16px;
+        color: #444;
+        line-height: 1.6;
+        margin-bottom: 0;
       }

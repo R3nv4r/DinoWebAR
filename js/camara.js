@@ -1,4 +1,4 @@
-  AFRAME.registerComponent('tap-to-place', {
+   AFRAME.registerComponent('tap-to-place', {
         init: function() {
           const ground = document.getElementById('ground');
           const modelo = document.getElementById('mi-modelo');
@@ -8,12 +8,10 @@
             const point = event.detail.intersection.point;
             const camPos = camera.object3D.position;
             
-            // Calculamos dirección desde la cámara al punto tocado
             let dx = point.x - camPos.x;
             let dz = point.z - camPos.z;
             const distancia = Math.sqrt(dx * dx + dz * dz);
             
-            // Empujamos el modelo 60 cm (0.6) más hacia adelante
             const offset = 0.6; 
             let finalX = point.x;
             let finalZ = point.z;
@@ -23,11 +21,9 @@
                 finalZ += (dz / distancia) * offset;
             }
             
-            // Obtener altura y posición configurada
             const alturaY = window.modeloActualConfig ? window.modeloActualConfig.positionY : 0;
             modelo.setAttribute('position', {x: finalX, y: alturaY, z: finalZ});
             
-            // Aplicar corrección de rotación si existe
             if (window.modeloActualConfig && window.modeloActualConfig.rotacion) {
                 modelo.setAttribute('rotation', window.modeloActualConfig.rotacion);
             }
@@ -50,11 +46,19 @@
         const carouselDiv = document.getElementById('model-carousel');
         const modeloAFrame = document.getElementById('mi-modelo');
         
-        // Añadimos las propiedades rotacion y svgActivo a cada modelo
+        // Elementos del Modal de Información
+        const btnInfo = document.getElementById('btn-info');
+        const infoModal = document.getElementById('info-modal');
+        const btnCloseInfo = document.getElementById('btn-close-info');
+        const infoTitle = document.getElementById('info-title');
+        const infoDescription = document.getElementById('info-description');
+
+        // Añadida la propiedad "descripcion" para cada dinosaurio
         const modelosDisponibles = [
             { 
                 id: 'coahuilaceratops', 
                 nombre: 'Coahuilaceratops',
+                descripcion: 'El Coahuilaceratops fue un dinosaurio herbívoro ceratópsido. Habitó en lo que hoy es México durante el periodo Cretácico. Es famoso por tener unos de los cuernos faciales más grandes jamás descubiertos.',
                 url: 'assets/modelos/coahuilaceratops.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -65,6 +69,7 @@
             { 
                 id: 'centrosaurus', 
                 nombre: 'Centrosaurus',
+                descripcion: 'Dinosaurio herbívoro de la familia de los ceratópsidos. Se caracterizaba por tener un gran cuerno nasal y un volante óseo en el cuello con proyecciones ganchudas.',
                 url: 'assets/modelos/Centrosaurus.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -75,6 +80,7 @@
             { 
                 id: 'coahuilasaurus',
                 nombre: 'Coahuilasaurus', 
+                descripcion: 'Un majestuoso dinosaurio "pico de pato" (hadrosaurio) descubierto en la región de Coahuila. Vivía en manadas y poseía fuertes mandíbulas para triturar vegetación.',
                 url: 'assets/modelos/Coahuilasaurus.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -85,6 +91,7 @@
             { 
                 id: 'tlatolophus', 
                 nombre: 'Tlatolophus',
+                descripcion: 'El Tlatolophus es un hadrosaurio reconocido por su cresta hueca en forma de "coma" en la cabeza, la cual probablemente usaba para emitir sonidos de baja frecuencia y comunicarse.',
                 url: 'assets/modelos/tlatolophus.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -95,6 +102,7 @@
             { 
                 id: 'velafrons', 
                 nombre: 'Velafrons',
+                descripcion: 'Su nombre significa "Frente de vela". Este hadrosaurio poseía una cresta ósea en la frente y vivió hace más de 70 millones de años en un entorno rico en vegetación costera.',
                 url: 'assets/modelos/velafrons.glb', 
                 scale: 1, 
                 positionY: -0.2,
@@ -104,9 +112,8 @@
             }
         ];
         
-        // 0. Función para cambiar el modelo en 3D dinámicamente
         function cargarModelo(modelo) {
-            window.modeloActualConfig = modelo; // Guardar referencia global para tap-to-place
+            window.modeloActualConfig = modelo; 
             modeloAFrame.setAttribute('gltf-model', modelo.url);
             modeloAFrame.setAttribute('scale', `${modelo.scale} ${modelo.scale} ${modelo.scale}`);
             
@@ -120,7 +127,6 @@
             }
         }
 
-        // 1. LÓGICA DE APERTURA Y CIERRE DE MENÚ DE MODELOS
         btnModels.addEventListener('click', () => {
             carouselContainer.classList.add('show-carousel');
         });
@@ -129,7 +135,6 @@
             carouselContainer.classList.remove('show-carousel');
         });
 
-        // 2. Generar botones y crear efecto Rolling
         function construirCarrusel() {
             carouselDiv.innerHTML = ''; 
             
@@ -137,13 +142,11 @@
                 const btnItem = document.createElement('div');
                 btnItem.className = 'model-option';
                 
-                // Estructura con atributos de imagen cerrada y abierta
                 btnItem.innerHTML = `
                     <img src="${modelo.svg}" class="carousel-icon" data-cerrado="${modelo.svg}" data-abierto="${modelo.svgActivo}" alt="${modelo.nombre}">
                     <span class="carousel-name">${modelo.nombre}</span>
                 `;
 
-                // EVENTO CLIC: Seleccionar modelo
                 btnItem.addEventListener('click', () => {
                     document.querySelectorAll('.model-option').forEach(el => {
                         el.classList.remove('active');
@@ -155,7 +158,6 @@
                     const miImg = btnItem.querySelector('.carousel-icon');
                     miImg.src = miImg.getAttribute('data-abierto');
 
-                    // Deslizar automáticamente al centro
                     btnItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                     cargarModelo(modelo);
                 });
@@ -163,7 +165,6 @@
                 carouselDiv.appendChild(btnItem);
             });
 
-            // EVENTO SCROLL: Efecto lupa en el centro (Rolling)
             carouselDiv.addEventListener('scroll', () => {
                 const carouselRect = carouselDiv.getBoundingClientRect();
                 const carouselCenter = carouselRect.left + (carouselRect.width / 2);
@@ -192,7 +193,6 @@
                 });
             });
 
-            // Iniciar por defecto
             setTimeout(() => {
                 const firstItem = carouselDiv.querySelector('.model-option');
                 if(firstItem) {
@@ -204,7 +204,6 @@
             }, 300);
         }
 
-        // 3. Botón INICIAR (Pantalla completa y revelar UI)
         btnStart.addEventListener('click', () => {
           const elem = document.documentElement;
           try {
@@ -225,22 +224,45 @@
           arUI.classList.add('active');
         });
 
-        // 4. Botón SALIR
         if (btnExitAR) {
           btnExitAR.addEventListener('click', () => {
             window.location.reload();
           });
         }
 
-        // 5. Botón eliminar/reposicionar
-        const btnCamara = document.getElementById('btn-eliminar');
-        btnCamara.addEventListener('click', () => {
-          modeloAFrame.setAttribute('visible', 'false');
-          btnCamara.style.transform = 'scale(0.8)';
-          setTimeout(() => { btnCamara.style.transform = 'scale(1)'; }, 200);
-        });
+        // --- LÓGICA DEL BOTÓN DE INFORMACIÓN (MODIFICADO) ---
+        function mostrarInformacion(e) {
+          if (e) e.preventDefault(); // Evitar comportamientos por defecto que puedan bloquear el clic
+          
+          // Animación del botón
+          btnInfo.style.transform = 'scale(0.8)';
+          setTimeout(() => { btnInfo.style.transform = 'scale(1)'; }, 200);
+          
+          // Llenar textos
+          if (window.modeloActualConfig) {
+              infoTitle.textContent = window.modeloActualConfig.nombre;
+              infoDescription.textContent = window.modeloActualConfig.descripcion || 'Información no disponible.';
+          } else {
+              infoTitle.textContent = 'Dinosaurio';
+              infoDescription.textContent = 'Información no disponible.';
+          }
+          
+          // Mostrar modal (usando display: flex a través de la clase active)
+          infoModal.classList.add('active');
+        }
 
-        // 6. LÓGICA DE CAPTURA FOTOGRÁFICA
+        // Asignar tanto click como touchstart para máxima compatibilidad en móviles/Safari
+        btnInfo.addEventListener('click', mostrarInformacion);
+        btnInfo.addEventListener('touchstart', mostrarInformacion, {passive: false});
+
+        // Evento para cerrar el Modal de Información
+        function cerrarInformacion(e) {
+            if (e) e.preventDefault();
+            infoModal.classList.remove('active');
+        }
+        btnCloseInfo.addEventListener('click', cerrarInformacion);
+        btnCloseInfo.addEventListener('touchstart', cerrarInformacion, {passive: false});
+
         btnCapture.addEventListener('click', () => {
             arUI.style.visibility = 'hidden';
             if(btnExitAR) btnExitAR.style.display = 'none';
@@ -307,11 +329,9 @@
             }, 100); 
         });
 
-        // 7. INICIO AUTOMÁTICO
         construirCarrusel();
         cargarModelo(modelosDisponibles[0]);
 
-        // 8. LÓGICA DE POLVO/RED ANIMADA
         const canvas = document.getElementById('canvas-polvo');
         const ctx = canvas.getContext('2d');
 
@@ -395,4 +415,3 @@
             canvas.height = window.innerHeight;
         });
       });
-    
