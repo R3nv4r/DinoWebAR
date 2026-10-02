@@ -133,7 +133,7 @@
                 id: 'latirhinus', 
                 nombre: 'Latirhinus',
                 descripcion: 'Su nombre significa "Frente de vela". Este hadrosaurio poseía una cresta ósea en la frente y vivió hace más de 70 millones de años en un entorno rico en vegetación costera.',
-                url: 'assets/modelos/optLatirhinus.glb', 
+                url: 'assets/modelos/opt Latirhinus.glb', 
                 audio: 'assets/audios/latirhinus.mp3',
                 scale: 5, 
                 positionY: -0.2,
