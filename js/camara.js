@@ -62,13 +62,19 @@
         const infoTitle = document.getElementById('info-title');
         const infoDescription = document.getElementById('info-description');
 
+        // --- NUEVO: Precargar logo para la marca de agua ---
+        const logoWatermark = new Image();
+        // Nota: Por ahora usa tu gif de inicio. Puedes cambiarlo por algo como 'assets/logo_transparente.png'
+        logoWatermark.src = 'assets/logo.png'; 
+
+        // Añadida la propiedad "descripcion" para cada dinosaurio
         const modelosDisponibles = [
             { 
                 id: 'coahuilaceratops', 
                 nombre: 'Coahuilaceratops',
                 descripcion: 'El Coahuilaceratops fue un dinosaurio herbívoro ceratópsido. Habitó en lo que hoy es México durante el periodo Cretácico. Es famoso por tener unos de los cuernos faciales más grandes jamás descubiertos.',
                 url: 'assets/modelos/coahuilaceratops.glb', 
-                audio: 'assets/audios/audio1.mp3',
+                audio: 'assets/audios/',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0', 
@@ -80,7 +86,7 @@
                 nombre: 'Centrosaurus',
                 descripcion: 'Dinosaurio herbívoro de la familia de los ceratópsidos. Se caracterizaba por tener un gran cuerno nasal y un volante óseo en el cuello con proyecciones ganchudas.',
                 url: 'assets/modelos/Centrosaurus.glb', 
-                audio: 'assets/audios/audio1.mp3',
+                audio: 'assets/audios/',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -92,7 +98,7 @@
                 nombre: 'Coahuilasaurus', 
                 descripcion: 'Un majestuoso dinosaurio "pico de pato" (hadrosaurio) descubierto en la región de Coahuila. Vivía en manadas y poseía fuertes mandíbulas para triturar vegetación.',
                 url: 'assets/modelos/Coahuilasaurus.glb', 
-                audio: 'assets/audios/audio1.mp3',
+                audio: 'assets/audios/',
                 scale: 1, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
@@ -127,9 +133,9 @@
                 id: 'latirhinus', 
                 nombre: 'Latirhinus',
                 descripcion: 'Su nombre significa "Frente de vela". Este hadrosaurio poseía una cresta ósea en la frente y vivió hace más de 70 millones de años en un entorno rico en vegetación costera.',
-                url: 'assets/modelos/Latirhinus.glb', 
+                url: 'assets/modelos/optLatirhinus.glb', 
                 audio: 'assets/audios/latirhinus.mp3',
-                scale: 1, 
+                scale: 5, 
                 positionY: -0.2,
                 rotacion: '0 0 0',
                 svg: 'assets/miniatura/layer1.svg',
@@ -371,6 +377,34 @@
                 if (canvas3D && sceneEl && sceneEl.renderer) {
                     sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
                     ctx.drawImage(canvas3D, 0, 0, captureCanvas.width, captureCanvas.height);
+                }
+                
+                // --- NUEVO: DIBUJAR LOGO (MARCA DE AGUA) ---
+                if (logoWatermark.complete && logoWatermark.width > 0) {
+                    const padding = 30; // Espacio desde los bordes derecho e inferior
+                    const logoWidth = 110; // Tamaño del logo (ancho en píxeles)
+                    
+                    // Calculamos el alto para no deformar la imagen original
+                    const logoRatio = logoWatermark.height / logoWatermark.width;
+                    const logoHeight = logoWidth * logoRatio;
+                    
+                    // Posición X e Y (esquina inferior derecha)
+                    const posX = captureCanvas.width - logoWidth - padding;
+                    const posY = captureCanvas.height - logoHeight - padding;
+                    
+                    // Añadir una ligera sombra para que el logo resalte sin importar el color del fondo
+                    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetX = 2;
+                    ctx.shadowOffsetY = 2;
+                    
+                    // Dibujamos el logo en el canvas
+                    ctx.drawImage(logoWatermark, posX, posY, logoWidth, logoHeight);
+                    
+                    // Limpiar sombra para evitar conflictos posteriores
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
                 }
                 
                 const flash = document.createElement('div');
